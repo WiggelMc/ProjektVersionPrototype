@@ -1,4 +1,4 @@
-import { convert, Converter } from "./api"
+import { Converter } from "./api"
 import { PayloadV1, PayloadV3, PayloadV5, PayloadV7, ReceiverV1, ReceiverV7 } from "./interfaces"
 
 console.log("Hello World")

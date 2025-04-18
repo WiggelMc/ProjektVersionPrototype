@@ -3,7 +3,8 @@ import { compressToBase64 } from "lz-string"
 interface GridCell {
     value?: number
     given?: boolean
-    region?: number
+    region?: number | null
+    c?: string
 }
 
 /**
@@ -82,7 +83,7 @@ export interface Puzzle {
     }[]
     xv?: {
         cells: string[]
-        value: string
+        value: "X" | "V"
     }[]
     quadruple?: {
         cells: string[]
@@ -182,7 +183,8 @@ const puzzle: Puzzle = {
             region: 7 - 1
         },
         "R7C1": {
-            region: 4 - 1
+            region: 4 - 1,
+            c: "#A8A8A8"
         }
     }),
     arrow: [

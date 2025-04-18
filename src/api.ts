@@ -14,7 +14,7 @@ interface DirectedHTTP extends HTTP {
 }
 
 
-function convert<RoutingInput, RoutingOutput extends RoutingInput = RoutingInput>(
+declare function convert<RoutingInput, RoutingOutput extends RoutingInput = RoutingInput>(
 	client_version: string,
 	server_version: string,
 	direction: "ClientToServer" | "ServerToClient",
@@ -68,8 +68,8 @@ const input2 = {
 }
 
 const output2 = {
-                method: "GET",
-                route: "/",
-                {interface: "V1"}
+    method: "GET",
+    route: "/",
+    interface: "V1",
     payload: "..."
 }

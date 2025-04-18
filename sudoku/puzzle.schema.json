@@ -1,0 +1,586 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.com/product.schema.json",
+  "title": "Puzzle",
+  "description": "Fpuzzles Format",
+  "type": "object",
+  "properties": {
+    "size": {
+      "type": "integer"
+    },
+    "title": {
+      "type": "string"
+    },
+    "author": {
+      "type": "string"
+    },
+    "ruleset": {
+      "type": "string"
+    },
+    "highlightConflicts": {
+      "type": "boolean"
+    },
+    "grid": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "value": {
+              "type": "integer"
+            },
+            "given": {
+              "type": "boolean"
+            },
+            "region": {
+              "type": "integer"
+            }
+          }
+        }
+      }
+    },
+    "diagonal+": {
+      "type": "boolean"
+    },
+    "diagonal-": {
+      "type": "boolean"
+    },
+    "antiknight": {
+      "type": "boolean"
+    },
+    "antiking": {
+      "type": "boolean"
+    },
+    "disjointgroups": {
+      "type": "boolean"
+    },
+    "nonconsecutive": {
+      "type": "boolean"
+    },
+    "extraregion": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cells": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "cells"
+        ]
+      }
+    },
+    "odd": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cell": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cell"
+        ]
+      }
+    },
+    "even": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cell": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cell"
+        ]
+      }
+    },
+    "thermometer": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "lines"
+        ]
+      }
+    },
+    "palindrome": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "lines"
+        ]
+      }
+    },
+    "killercage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cells": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cells"
+        ]
+      }
+    },
+    "littlekillersum": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cell": {
+            "type": "string"
+          },
+          "cells": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "direction": {
+            "type": "string",
+            "enum": [
+              "DR",
+              "UR",
+              "UL",
+              "DL"
+            ]
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cell",
+          "cells",
+          "direction",
+          "value"
+        ]
+      }
+    },
+    "sandwichsum": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cell": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cell",
+          "value"
+        ]
+      }
+    },
+    "difference": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cells": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cells"
+        ]
+      }
+    },
+    "negative": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "ratio": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cells": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cells"
+        ]
+      }
+    },
+    "clone": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cells": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "cloneCells": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "cells",
+          "cloneCells"
+        ]
+      }
+    },
+    "arrow": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "cells": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "lines",
+          "cells"
+        ]
+      }
+    },
+    "betweenline": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "lines"
+        ]
+      }
+    },
+    "minimum": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cell": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cell"
+        ]
+      }
+    },
+    "maximum": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cell": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cell"
+        ]
+      }
+    },
+    "xv": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cells": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cells",
+          "value"
+        ]
+      }
+    },
+    "quadruple": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cells": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "values": {
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          }
+        },
+        "required": [
+          "cells",
+          "values"
+        ]
+      }
+    },
+    "text": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cells": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "value": {
+            "type": "string"
+          },
+          "fontC": {
+            "type": "string"
+          },
+          "size": {
+            "type": "number"
+          },
+          "angle": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "cells",
+          "value",
+          "fontC",
+          "size"
+        ]
+      }
+    },
+    "circle": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cells": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "baseC": {
+            "type": "string"
+          },
+          "outlineC": {
+            "type": "string"
+          },
+          "fontC": {
+            "type": "string"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "angle": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "cells",
+          "baseC",
+          "outlineC",
+          "fontC",
+          "width",
+          "height",
+          "angle"
+        ]
+      }
+    },
+    "rectangle": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cells": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "baseC": {
+            "type": "string"
+          },
+          "outlineC": {
+            "type": "string"
+          },
+          "fontC": {
+            "type": "string"
+          },
+          "width": {
+            "type": "number"
+          },
+          "height": {
+            "type": "number"
+          },
+          "angle": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "cells",
+          "baseC",
+          "outlineC",
+          "fontC",
+          "width",
+          "height",
+          "angle"
+        ]
+      }
+    },
+    "line": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "lines": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          },
+          "outlineC": {
+            "type": "string"
+          },
+          "width": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "lines",
+          "outlineC",
+          "width"
+        ]
+      }
+    },
+    "cage": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "cells": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "outlineC": {
+            "type": "string"
+          },
+          "fontC": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cells",
+          "outlineC",
+          "fontC"
+        ]
+      }
+    }
+  },
+  "additionalProperties": false,
+  "required": [
+    "size",
+    "title",
+    "author",
+    "ruleset",
+    "highlightConflicts",
+    "grid"
+  ]
+}

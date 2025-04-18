@@ -4,11 +4,15 @@
   "description": "",
   "main": "main.ts",
   "scripts": {
-    "start": "tsc && node ./build/main.js"
+    "start": "tsc && node ./build/main.js",
+    "sudoku": "tsc && node ./build/sudoku/sudoku.js"
   },
   "author": "",
   "license": "UNLICENSED",
   "devDependencies": {
     "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "lz-string": "^1.5.0"
   }
 }

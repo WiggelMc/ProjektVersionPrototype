@@ -1,0 +1,600 @@
+{
+  "$schema": "puzzle.schema.json",
+  "size": 9,
+  "title": "Custom Sudoku",
+  "author": "Some Author",
+  "ruleset": "The Rules are as follows\nThere is rules\n\nTest\n\nWhile true:\ndo",
+  "highlightConflicts": false,
+  "grid": [
+    [
+      {
+        "value": 1,
+        "given": true
+      },
+      {},
+      {},
+      {},
+      {},
+      {
+        "region": 2
+      },
+      {},
+      {},
+      {}
+    ],
+    [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {
+        "region": 1
+      },
+      {},
+      {}
+    ],
+    [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ]
+  ],
+  "diagonal+": true,
+  "diagonal-": true,
+  "antiknight": true,
+  "antiking": true,
+  "disjointgroups": true,
+  "nonconsecutive": true,
+  "extraregion": [
+    {
+      "cells": [
+        "R6C6",
+        "R6C7",
+        "R6C8",
+        "R7C6",
+        "R7C7",
+        "R7C8",
+        "R8C6",
+        "R8C7",
+        "R8C8"
+      ]
+    }
+  ],
+  "odd": [
+    {
+      "cell": "R6C2"
+    }
+  ],
+  "even": [
+    {
+      "cell": "R6C3"
+    }
+  ],
+  "thermometer": [
+    {
+      "lines": [
+        [
+          "R1C2",
+          "R2C2",
+          "R3C2"
+        ]
+      ]
+    },
+    {
+      "lines": [
+        [
+          "R1C4",
+          "R2C4",
+          "R3C4"
+        ]
+      ]
+    },
+    {
+      "lines": [
+        [
+          "R1C4",
+          "R2C4",
+          "R2C5"
+        ]
+      ]
+    }
+  ],
+  "palindrome": [
+    {
+      "lines": [
+        [
+          "R1C3",
+          "R2C3",
+          "R3C3"
+        ]
+      ]
+    }
+  ],
+  "killercage": [
+    {
+      "cells": [
+        "R4C1",
+        "R5C1"
+      ]
+    },
+    {
+      "cells": [
+        "R4C2",
+        "R5C2"
+      ],
+      "value": "8"
+    }
+  ],
+  "littlekillersum": [
+    {
+      "cell": "R3C0",
+      "cells": [
+        "R4C1",
+        "R5C2",
+        "R6C3",
+        "R7C4",
+        "R8C5",
+        "R9C6"
+      ],
+      "direction": "DR",
+      "value": "10"
+    },
+    {
+      "cell": "R10C1",
+      "cells": [
+        "R9C2",
+        "R8C3",
+        "R7C4",
+        "R6C5",
+        "R5C6",
+        "R4C7",
+        "R3C8",
+        "R2C9"
+      ],
+      "direction": "UR",
+      "value": "11"
+    },
+    {
+      "cell": "R10C3",
+      "cells": [
+        "R9C2",
+        "R8C1"
+      ],
+      "direction": "UL",
+      "value": "12"
+    },
+    {
+      "cell": "R5C0",
+      "cells": [
+        "R4C1",
+        "R3C2",
+        "R2C3",
+        "R1C4"
+      ],
+      "direction": "UR",
+      "value": "9"
+    },
+    {
+      "cell": "R0C6",
+      "cells": [
+        "R1C5",
+        "R2C4",
+        "R3C3",
+        "R4C2",
+        "R5C1"
+      ],
+      "direction": "DL",
+      "value": "5"
+    },
+    {
+      "cell": "R0C5",
+      "cells": [
+        "R1C6",
+        "R2C7",
+        "R3C8",
+        "R4C9"
+      ],
+      "direction": "DR",
+      "value": "6"
+    },
+    {
+      "cell": "R5C10",
+      "cells": [
+        "R4C9",
+        "R3C8",
+        "R2C7",
+        "R1C6"
+      ],
+      "direction": "UL",
+      "value": "3"
+    }
+  ],
+  "sandwichsum": [
+    {
+      "cell": "R2C10",
+      "value": "15"
+    },
+    {
+      "cell": "R10C8",
+      "value": "16"
+    },
+    {
+      "cell": "R0C7",
+      "value": "17"
+    }
+  ],
+  "difference": [
+    {
+      "cells": [
+        "R7C4",
+        "R7C3"
+      ]
+    },
+    {
+      "cells": [
+        "R8C4",
+        "R8C3"
+      ],
+      "value": "2"
+    }
+  ],
+  "negative": [
+    "ratio",
+    "xv"
+  ],
+  "ratio": [
+    {
+      "cells": [
+        "R7C4",
+        "R7C5"
+      ]
+    },
+    {
+      "cells": [
+        "R8C4",
+        "R8C5"
+      ],
+      "value": "3"
+    }
+  ],
+  "clone": [
+    {
+      "cells": [
+        "R4C7",
+        "R4C8",
+        "R5C7"
+      ],
+      "cloneCells": [
+        "R4C7",
+        "R4C8",
+        "R5C7"
+      ]
+    },
+    {
+      "cells": [
+        "R4C4",
+        "R4C5",
+        "R5C4"
+      ],
+      "cloneCells": [
+        "R4C4",
+        "R4C5",
+        "R5C4"
+      ]
+    }
+  ],
+  "arrow": [
+    {
+      "lines": [
+        [
+          "R1C6",
+          "R2C6",
+          "R3C6"
+        ]
+      ],
+      "cells": [
+        "R1C6"
+      ]
+    },
+    {
+      "lines": [
+        [
+          "R1C7",
+          "R2C7",
+          "R3C7",
+          "R2C8"
+        ]
+      ],
+      "cells": [
+        "R1C7",
+        "R1C8"
+      ]
+    }
+  ],
+  "betweenline": [
+    {
+      "lines": [
+        [
+          "R9C5",
+          "R9C6",
+          "R9C7",
+          "R9C8"
+        ]
+      ]
+    }
+  ],
+  "minimum": [
+    {
+      "cell": "R8C1"
+    }
+  ],
+  "maximum": [
+    {
+      "cell": "R8C2"
+    },
+    {
+      "cell": "R7C2"
+    }
+  ],
+  "xv": [
+    {
+      "cells": [
+        "R5C6",
+        "R5C5"
+      ],
+      "value": "X"
+    },
+    {
+      "cells": [
+        "R5C6",
+        "R6C6"
+      ],
+      "value": "V"
+    }
+  ],
+  "quadruple": [
+    {
+      "cells": [
+        "R6C6",
+        "R6C7",
+        "R7C6",
+        "R7C7"
+      ],
+      "values": [
+        1,
+        2,
+        3,
+        4
+      ]
+    },
+    {
+      "cells": [
+        "R6C7",
+        "R6C8",
+        "R7C7",
+        "R7C8"
+      ],
+      "values": [
+        1,
+        1,
+        2,
+        2
+      ]
+    },
+    {
+      "cells": [
+        "R7C7",
+        "R7C8",
+        "R8C7",
+        "R8C8"
+      ],
+      "values": [
+        1,
+        2
+      ]
+    },
+    {
+      "cells": [
+        "R7C6",
+        "R7C7",
+        "R8C6",
+        "R8C7"
+      ],
+      "values": [
+        1,
+        3,
+        4
+      ]
+    }
+  ],
+  "text": [
+    {
+      "cells": [
+        "R7C9"
+      ],
+      "value": "Hi",
+      "fontC": "#000000",
+      "size": 0.5
+    },
+    {
+      "cells": [
+        "R6C9",
+        "R7C9"
+      ],
+      "value": "Ho",
+      "fontC": "#000000",
+      "size": 0.5
+    },
+    {
+      "cells": [
+        "R7C10"
+      ],
+      "value": "Oh",
+      "fontC": "#000000",
+      "size": 0.5
+    },
+    {
+      "cells": [
+        "R6C10"
+      ],
+      "value": "Yay",
+      "fontC": "#04151A",
+      "size": 0.6,
+      "angle": 30
+    }
+  ],
+  "circle": [
+    {
+      "cells": [
+        "R5C8"
+      ],
+      "baseC": "#FFFFFF",
+      "outlineC": "#080808",
+      "fontC": "#171717",
+      "width": 0.9,
+      "height": 0.9,
+      "angle": 15
+    },
+    {
+      "cells": [
+        "R4C6",
+        "R4C7",
+        "R5C6",
+        "R5C7"
+      ],
+      "baseC": "#FFFFFF",
+      "outlineC": "#080808",
+      "fontC": "#171717",
+      "width": 0.9,
+      "height": 0.9,
+      "angle": 15
+    },
+    {
+      "cells": [
+        "R3C5",
+        "R4C5"
+      ],
+      "baseC": "#FFFFFF",
+      "outlineC": "#080808",
+      "fontC": "#171717",
+      "width": 0.9,
+      "height": 0.9,
+      "angle": 15
+    }
+  ],
+  "rectangle": [
+    {
+      "cells": [
+        "R2C5",
+        "R3C5"
+      ],
+      "baseC": "#FFFFFF",
+      "outlineC": "#000000",
+      "fontC": "#000000",
+      "width": 0.45,
+      "height": 0.55,
+      "angle": 15
+    }
+  ],
+  "line": [
+    {
+      "lines": [
+        [
+          "R4C3",
+          "R5C3",
+          "R6C3",
+          "R6C4",
+          "R7C4",
+          "R8C4",
+          "R9C4"
+        ]
+      ],
+      "outlineC": "#A7CF15",
+      "width": 0.25
+    }
+  ],
+  "cage": [
+    {
+      "cells": [
+        "R8C3",
+        "R8C4"
+      ],
+      "outlineC": "#FF301C",
+      "fontC": "#130B14"
+    }
+  ]
+}

@@ -1,26 +1,47 @@
 
-interface ConversionData<Routing> {
+export interface ConversionData<PathRoute, InternalRoute> {
     payload: unknown
-    routing: Routing 
+    path_route: PathRoute 
+    internal_route: InternalRoute 
 }
 
-interface HTTP {
+export interface HTTP {
     method: "GET" | "POST" | "PUT"
     route: string
 }
 
-interface DirectedHTTP extends HTTP {
+interface InterfaceRoute {
     interface_version: string
 }
 
+export class Converter<PathRoute, InternalRoute = {}> {
+    own_version: string
+    other_version: string
+    direction: string
+    route: PathRoute
 
-declare function convert<RoutingInput, RoutingOutput extends RoutingInput = RoutingInput>(
-	client_version: string,
-	server_version: string,
-	direction: "ClientToServer" | "ServerToClient",
-	data: ConversionData<RoutingInput>
-): ConversionData<RoutingOutput>
+    constructor(
+        own_version: string, // Compile time constant
+        other_version: string,
+        direction: "Request" | "Respond",
+        route: PathRoute
+    ) {
+        this.own_version = own_version
+        this.other_version = other_version
+        this.direction = direction
+        this.route = route
+    }
 
+    convertRequest(payload: unknown): ConversionData<PathRoute, InternalRoute> {
+        // "Request": convert to other / "Respond": convert to own
+        throw new Error("Not Implemented")
+    }
+
+    convertResponse(payload: unknown): ConversionData<PathRoute, InternalRoute> {
+        // "Request": convert to own / "Respond": convert to other
+        throw new Error("Not Implemented")
+    }
+}
 
 
 // Client 1.2 [HTTP 1.2 -> HTTP 1.1]    >> (HTTP 1.1) >>    Server 1.1 [NOP]
@@ -30,22 +51,22 @@ declare function convert<RoutingInput, RoutingOutput extends RoutingInput = Rout
 // Server 1.3 [HTTP 1.3 -> HTTP 1.2]    >> (HTTP 1.2) >>    Client 1.2 [NOP]
 
 
-const out_data = convert<HTTP, DirectedHTTP>(
-    "V1",
-    "V2",
-    "ClientToServer",
-    {
-        payload: {
-            name: "Peter"
-        },
-        routing: {
-            method: "PUT",
-            route: "user/"
-        }
-    }
-)
+// const out_data = convert<HTTP, InterfaceRoute>(
+//     "V1",
+//     "V2",
+//     "ClientToServer",
+//     {
+//         payload: {
+//             name: "Peter"
+//         },
+//         routing: {
+//             method: "PUT",
+//             route: "user/"
+//         }
+//     }
+// )
 
-const x = out_data
+// const x = out_data
 
 
 const input = {

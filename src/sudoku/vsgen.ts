@@ -21,6 +21,11 @@ program
 
 
 
+program
+    .helpCommand('help [command]', 'Display help for command')
+
+
+
 type GenerateOptions = {
     config: string
     out: string[]
@@ -119,11 +124,11 @@ type WatchOptions = {
     out?: string[]
     cache: boolean
     analyse?: string
-    "analysis-out"?: string
+    "analysis-out"?: string[]
     show?: typeof showEngines[number]
     "export-engine"?: typeof exportEngines[number]
     "export-format"?: typeof exportFormats[number]
-    "on-success"?: string
+    "on-success"?: string[]
 }
 
 program
@@ -137,6 +142,7 @@ program
     .addOption(new Option('-s, --show <engine>', 'Puzzle Engine to start').choices(showEngines))
     .addOption(new Option('-e, --export-engine <engine>', 'Puzzle Engine to export to').choices(exportEngines))
     .addOption(new Option('-f, --export-format <format>', 'Export Format').choices(exportFormats))
+    .option('-t, --on-success <command>', 'Run after successful Generation', allowMultiple)
     .action((options: WatchOptions) => {
         if (options["analysis-out"] !== undefined && options.analyse === undefined)
             error("analysis-out Option requires analyse Option to be specified")
@@ -155,6 +161,20 @@ program
             error("at least one output option must be specified")
 
         console.log('generate Command:', options);
+    })
+
+
+
+type JsonSchemaOptions = {
+    out: string[]
+}
+
+program
+    .command('json-schema')
+    .description('Dump Json Schemas in the specified Directory')
+    .requiredOption('-o, --out <dir>', 'Output Directory', allowMultiple)
+    .action((options: JsonSchemaOptions) => {
+        console.log('json-schema Command:', options);
     })
 
 

@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://example.com/product.schema.json",
+  "$id": "variant-sudoku-generator/puzzle-config/1.0.0",
   "title": "Puzzle",
   "description": "Fpuzzles Format",
   "type": "object",

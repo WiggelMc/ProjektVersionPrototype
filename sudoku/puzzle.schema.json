@@ -1,15 +1,19 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "https://json-schema.org/draft-07/schema#",
   "$id": "variant-sudoku-generator/puzzle-config/1.0.0",
   "title": "Puzzle",
   "description": "Fpuzzles Format",
   "type": "object",
   "properties": {
+    "$schema": {
+      "type": "string"
+    },
     "size": {
       "type": "integer"
     },
     "title": {
       "type": "string"
+
     },
     "author": {
       "type": "string"

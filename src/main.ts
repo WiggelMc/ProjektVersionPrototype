@@ -1,5 +1,5 @@
-import { Converter } from "./api"
-import { PayloadV1, PayloadV3, PayloadV5, PayloadV7, ReceiverV1, ReceiverV7 } from "./interfaces"
+import { Converter } from "./api.js"
+import { PayloadV1, PayloadV3, PayloadV5, PayloadV7, ReceiverV1, ReceiverV7 } from "./interfaces.js"
 
 console.log("Hello World")
 

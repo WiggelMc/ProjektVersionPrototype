@@ -1,4 +1,5 @@
 import { compressToBase64 } from "lz-string"
+import puppeteer from "puppeteer"
 
 interface GridCell {
     value?: number
@@ -169,6 +170,9 @@ const puzzle: Puzzle = {
     size: 9,
     highlightConflicts: true,
     grid: gridFor(9, {
+        "R1C1": {
+            value: 1
+        },
         "R1C3": {
             value: 4,
             given: true
@@ -229,16 +233,33 @@ const puzzle: Puzzle = {
                 "R9C5"
             ],
             direction: "DL",
-            value: "13"
+            value: "14"
         }
     ]
 }
 
-console.log("\nPuzzle\n\n")
-const json = JSON.stringify(puzzle)
-console.log(json)
-const base64 = compressToBase64(json)
-const url = `https://www.f-puzzles.com/?load=${base64}`
+function toPuzzleCode(puzzle: Puzzle): string {
+    const json = JSON.stringify(puzzle)
+    console.log(json)
+    const base64 = compressToBase64(json)
+    const url = `https://www.f-puzzles.com/?load=${base64}`
+    return url
+}
 
-console.log("\n")
+console.log("\nPuzzle\n\n")
+const url = toPuzzleCode(puzzle)
 console.log(url)
+
+async function runBrowser() {
+    const browser = await puppeteer.launch();
+    const page = await browser.newPage();
+
+    await page.goto(url)
+
+    setTimeout(async () => {
+        puzzle.author = "Peter"
+        await page.evaluate(`importPuzzle(${toPuzzleCode(puzzle)}, true)`)
+    }, 2000)
+}
+
+// runBrowser()

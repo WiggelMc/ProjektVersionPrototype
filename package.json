@@ -5,7 +5,10 @@
   "main": "main.ts",
   "scripts": {
     "start": "tsc && node ./build/main.js",
-    "sudoku": "tsc && node ./build/sudoku/sudoku.js"
+    "sudoku": "tsc && node ./build/sudoku/sudoku.js",
+    "compile-vsgen": "tsc",
+    "run-vsgen": "tsc && node ./build/sudoku/vsgen.js",
+    "vsgen": "node ./build/sudoku/vsgen.js"
   },
   "author": "",
   "license": "UNLICENSED",
@@ -13,6 +16,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "commander": "^13.1.0",
     "lz-string": "^1.5.0",
     "puppeteer": "^24.6.1"
   }

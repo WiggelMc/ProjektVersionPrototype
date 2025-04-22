@@ -1,0 +1,7 @@
+# yaml-language-server: $schema=./puzzle.schema.json
+size: 0
+title: "Test"
+author: "Kim"
+ruleset: "This"
+highlightConflicts: false
+grid: []

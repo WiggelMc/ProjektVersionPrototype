@@ -1,3 +1,4 @@
+import { readFileSync } from "fs";
 import { grid, Puzzle } from "./sudoku";
 import { chromium } from "playwright";
 
@@ -85,14 +86,26 @@ const url = puzzle.toFPuzzlesUrl()
 console.log(url)
 
 declare function importPuzzle(string: string, clearHistory: boolean): void
+declare function prInit(): void
 
 async function runBrowser() {
-    const browser = await chromium.launch({ headless: false })
-    const page = await browser.newPage();
+    const browser = await chromium.launch({ headless: false, args: ["--start-maximized"] })
+    const context = await browser.newContext({ viewport: null })
+    const page = await context.newPage();
     page.on('close', () => {
         process.exit(0);
     })
     await page.goto(url)
+
+    await page.addStyleTag({ path: './window/puzzleWindow.css' });
+    await page.addScriptTag({ path: './build/sudoku/windowScript.js' })
+
+    const htmlContent = readFileSync('./window/puzzleWindow.html', 'utf-8');
+
+    await page.evaluate((html) => {
+        document.body.insertAdjacentHTML("beforeend", html)
+        prInit()
+    }, htmlContent)
 
     let counter = 0
 

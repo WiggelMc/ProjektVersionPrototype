@@ -1,11 +1,36 @@
 import { compressToBase64 } from "lz-string"
-import puppeteer from "puppeteer"
 
-interface GridCell {
+const cellColors = [
+    "#A8A8A8",
+    "#000000",
+    "#FFA0A0",
+    "#FFE060",
+    "#FFFFB0",
+    "#B0FFB0",
+    "#60D060",
+    "#D0D0FF",
+    "#8080F0",
+    "#FF80FF",
+    "#FFD0D0"
+] as const
+
+export type CellColor = typeof cellColors[number]
+
+export interface GridCell {
+    /** Cell Value */
     value?: number
+    /** Is the value field a given or a user digit */
     given?: boolean
+    /** Region Number, null excludes the cell from any region */
     region?: number | null
-    c?: string
+    /** Background Color */
+    c?: CellColor
+    /** User Center Pencil Marks */
+    centerPencilMarks?: number[]
+    /** User Corner Pencil Marks */
+    cornerPencilMarks?: number[]
+    /** User Color Highlights */
+    highlight?: CellColor
 }
 
 /**
@@ -14,7 +39,7 @@ interface GridCell {
 
 // Convert to URL: https://codepen.io/Holy-Fire/pen/VNRZme
 // LZString.compressToBase64 // LZString.decompressFromBase64
-export interface Puzzle {
+export interface PuzzleData {
     size: number
     title: string
     author: string
@@ -127,9 +152,28 @@ export interface Puzzle {
     }[]
 }
 
+export class Puzzle {
+    data: PuzzleData
+    constructor(data: PuzzleData) {
+        this.data = data
+    }
 
+    toFPuzzlesJson(): string {
+        return JSON.stringify(this.data)
+    }
 
-function gridFor(size: number, cells: { [k: string]: GridCell }): GridCell[][] {
+    toFPuzzlesEncoding(): string {
+        const json = this.toFPuzzlesJson()
+        return compressToBase64(json)
+    }
+
+    toFPuzzlesUrl(): string {
+        const encoding = this.toFPuzzlesEncoding()
+        return `https://www.f-puzzles.com/?load=${encoding}`
+    }
+}
+
+export function grid(size: number, cells: { [k: string]: GridCell }): GridCell[][] {
     const arr = []
     for (let i = 0; i < size; i++) {
         const inner_arr = []
@@ -162,104 +206,3 @@ function gridFor(size: number, cells: { [k: string]: GridCell }): GridCell[][] {
 
     return arr
 }
-
-const puzzle: Puzzle = {
-    title: "Puzzle 1",
-    author: "Kim",
-    ruleset: "Normal Sudoku Rules apply.",
-    size: 9,
-    highlightConflicts: true,
-    grid: gridFor(9, {
-        "R1C1": {
-            value: 1
-        },
-        "R1C3": {
-            value: 4,
-            given: true
-        },
-        "R5C3": {
-            region: 5 - 1
-        },
-        "R6C4": {
-            region: 8 - 1
-        },
-        "R9C4": {
-            region: 7 - 1
-        },
-        "R7C1": {
-            region: 4 - 1,
-            c: "#A8A8A8"
-        }
-    }),
-    arrow: [
-        {
-            cells: [
-                "R4C6"
-            ],
-            lines: [
-                [
-                    "R4C6",
-                    "R5C5",
-                    "R6C5"
-                ]
-            ]
-        }
-    ],
-    line: [
-        {
-            width: 0.35,
-            outlineC: "#68ef67",
-            lines: [
-                [
-                    "R8C3",
-                    "R8C4",
-                    "R8C5",
-                    "R8C6",
-                    "R7C7",
-                    "R6C7",
-                    "R5C7"
-                ]
-            ]
-        }
-    ],
-    littlekillersum: [
-        {
-            cell: "R4C10",
-            cells: [
-                "R5C9",
-                "R6C8",
-                "R7C7",
-                "R8C6",
-                "R9C5"
-            ],
-            direction: "DL",
-            value: "14"
-        }
-    ]
-}
-
-function toPuzzleCode(puzzle: Puzzle): string {
-    const json = JSON.stringify(puzzle)
-    console.log(json)
-    const base64 = compressToBase64(json)
-    const url = `https://www.f-puzzles.com/?load=${base64}`
-    return url
-}
-
-console.log("\nPuzzle\n\n")
-const url = toPuzzleCode(puzzle)
-console.log(url)
-
-async function runBrowser() {
-    const browser = await puppeteer.launch();
-    const page = await browser.newPage();
-
-    await page.goto(url)
-
-    setTimeout(async () => {
-        puzzle.author = "Peter"
-        await page.evaluate(`importPuzzle(${toPuzzleCode(puzzle)}, true)`)
-    }, 2000)
-}
-
-// runBrowser()

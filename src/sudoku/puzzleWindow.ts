@@ -1,0 +1,111 @@
+import { grid, Puzzle } from "./sudoku";
+import { chromium } from "playwright";
+
+const puzzle: Puzzle = new Puzzle({
+    title: "Puzzle 1",
+    author: "Kim",
+    ruleset: "Normal Sudoku Rules apply.",
+    size: 9,
+    highlightConflicts: true,
+    grid: grid(9, {
+        "R1C1": {
+            value: 1
+        },
+        "R3C1": {
+            cornerPencilMarks: [1, 2, 4, 5],
+            centerPencilMarks: [1, 2, 3, 4, 5, 6]
+        },
+        "R1C3": {
+            value: 4,
+            given: true
+        },
+        "R5C3": {
+            region: 5 - 1
+        },
+        "R6C4": {
+            region: 8 - 1
+        },
+        "R9C4": {
+            region: 7 - 1
+        },
+        "R7C1": {
+            region: 4 - 1,
+            c: "#A8A8A8"
+        }
+    }),
+    arrow: [
+        {
+            cells: [
+                "R4C6"
+            ],
+            lines: [
+                [
+                    "R4C6",
+                    "R5C5",
+                    "R6C5"
+                ]
+            ]
+        }
+    ],
+    line: [
+        {
+            width: 0.35,
+            outlineC: "#68ef67",
+            lines: [
+                [
+                    "R8C3",
+                    "R8C4",
+                    "R8C5",
+                    "R8C6",
+                    "R7C7",
+                    "R6C7",
+                    "R5C7"
+                ]
+            ]
+        }
+    ],
+    littlekillersum: [
+        {
+            cell: "R4C10",
+            cells: [
+                "R5C9",
+                "R6C8",
+                "R7C7",
+                "R8C6",
+                "R9C5"
+            ],
+            direction: "DL",
+            value: "14"
+        }
+    ]
+})
+
+console.log("\nPuzzle\n\n")
+const url = puzzle.toFPuzzlesUrl()
+console.log(url)
+
+declare function importPuzzle(string: string, clearHistory: boolean): void
+
+async function runBrowser() {
+    const browser = await chromium.launch({ headless: false })
+    const page = await browser.newPage();
+    page.on('close', () => {
+        process.exit(0);
+    })
+    await page.goto(url)
+
+    let counter = 0
+
+    function startTimeout() {
+        setTimeout(async () => {
+            puzzle.data.author = `Peter ${counter++}`
+            await page.evaluate((code) => {
+                importPuzzle(code, true)
+            }, puzzle.toFPuzzlesEncoding())
+            startTimeout()
+        }, 100)
+    }
+    startTimeout()
+}
+
+runBrowser()

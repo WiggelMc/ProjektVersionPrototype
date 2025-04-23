@@ -9,28 +9,11 @@ const puzzle: Puzzle = new Puzzle({
     size: 9,
     highlightConflicts: true,
     grid: grid(9, {
-        "R1C1": {
-            value: 1
-        },
         "R3C1": {
             cornerPencilMarks: [1, 2, 4, 5],
             centerPencilMarks: [1, 2, 3, 4, 5, 6]
         },
-        "R1C3": {
-            value: 4,
-            given: true
-        },
-        "R5C3": {
-            region: 5 - 1
-        },
-        "R6C4": {
-            region: 8 - 1
-        },
-        "R9C4": {
-            region: 7 - 1
-        },
         "R7C1": {
-            region: 4 - 1,
             c: "#A8A8A8"
         }
     }),
@@ -85,8 +68,26 @@ console.log("\nPuzzle\n\n")
 const url = puzzle.toFPuzzlesUrl()
 console.log(url)
 
+
+const puzzleCodes: string[] = []
+const redPuzzleCodes: string[] = []
+
+puzzleCodes.push(puzzle.toFPuzzlesEncoding())
+for (let d = 1; d <= 9; d++) {
+    for (let r = 0; r < 9; r++) {
+        for (let c = 0; c < 9; c++) {
+            puzzle.data.grid[r]![c]!.value = d
+            puzzleCodes.push(puzzle.toFPuzzlesEncoding())
+            puzzle.data.grid[r]![c]!.highlight = "#FFA0A0"
+            redPuzzleCodes.push(puzzle.toFPuzzlesEncoding())
+            puzzle.data.grid[r]![c]!.highlight = undefined
+        }
+    }
+}
+
+
 declare function importPuzzle(string: string, clearHistory: boolean): void
-declare function prInit(): void
+declare function prInit(puzzleCodes: string[], redPuzzleCodes: string[]): void
 
 async function runBrowser() {
     const browser = await chromium.launch({ headless: false, args: ["--start-maximized"] })
@@ -102,23 +103,23 @@ async function runBrowser() {
 
     const htmlContent = readFileSync('./window/puzzleWindow.html', 'utf-8');
 
-    await page.evaluate((html) => {
+    await page.evaluate(([html, codes, redCodes]) => {
         document.body.insertAdjacentHTML("beforeend", html)
-        prInit()
-    }, htmlContent)
+        prInit(codes, redCodes)
+    }, [htmlContent, puzzleCodes, redPuzzleCodes] as const)
 
-    let counter = 0
+    // let counter = 0
 
-    function startTimeout() {
-        setTimeout(async () => {
-            puzzle.data.author = `Peter ${counter++}`
-            await page.evaluate((code) => {
-                importPuzzle(code, true)
-            }, puzzle.toFPuzzlesEncoding())
-            startTimeout()
-        }, 100)
-    }
-    startTimeout()
+    // function startTimeout() {
+    //     setTimeout(async () => {
+    //         puzzle.data.author = `Peter ${counter++}`
+    //         await page.evaluate((code) => {
+    //             importPuzzle(code, true)
+    //         }, puzzleCodes[counter % puzzleCodes.length]!)
+    //         startTimeout()
+    //     }, 100)
+    // }
+    // startTimeout()
 }
 
 runBrowser()

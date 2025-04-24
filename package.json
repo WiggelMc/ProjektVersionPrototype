@@ -6,7 +6,7 @@
   "scripts": {
     "postinstall": "npx playwright install",
     "start": "tsc && node ./build/main.js",
-    "sudoku": "tsc && node ./build/sudoku/puzzleWindow.js",
+    "sudoku": "tsc && node ./build/sudoku/showPuzzle.js",
     "compile-vsgen": "tsc",
     "run-vsgen": "tsc && node ./build/sudoku/vsgen.js",
     "vsgen": "node ./build/sudoku/vsgen.js"

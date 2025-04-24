@@ -1,112 +1,164 @@
-import { readFileSync } from "fs";
-import { grid, Puzzle } from "./sudoku";
-import { chromium } from "playwright";
+declare function importPuzzle(string: string, clearHistory: boolean): void
+declare const puzzleTimer: { shown: boolean }
 
-const puzzle: Puzzle = new Puzzle({
-    title: "Puzzle 1",
-    author: "Kim",
-    ruleset: "Normal Sudoku Rules apply.",
-    size: 9,
-    highlightConflicts: true,
-    grid: grid(9, {
-        "R3C1": {
-            cornerPencilMarks: [1, 2, 4, 5],
-            centerPencilMarks: [1, 2, 3, 4, 5, 6]
-        },
-        "R7C1": {
-            c: "#A8A8A8"
+export function prInit(puzzleCodes: string[], redPuzzleCodes: string[]) {
+
+    puzzleTimer.shown = false
+
+
+    const mediaSeekBar = document.getElementById("media-seek-bar") as HTMLInputElement
+    const mediaRefresh = document.getElementById("media-refresh") as HTMLButtonElement
+    const mediaPlay = document.getElementById("media-play") as HTMLButtonElement
+    const mediaProgress = document.getElementById("media-progress") as HTMLParagraphElement
+    const mediaBack = document.getElementById("media-back") as HTMLButtonElement
+    const mediaForward = document.getElementById("media-forward") as HTMLButtonElement
+    const mediaSpeed = document.getElementById("media-speed") as HTMLSelectElement
+    const mediaShowRed = document.getElementById("media-show-red") as HTMLButtonElement
+
+
+    let progress = 0
+    const setProgress = (newProgress: number, newRed: boolean) => {
+        if (newProgress >= puzzleCodes.length) {
+            setPlaying(false)
+            newProgress = puzzleCodes.length - 1
         }
-    }),
-    arrow: [
-        {
-            cells: [
-                "R4C6"
-            ],
-            lines: [
-                [
-                    "R4C6",
-                    "R5C5",
-                    "R6C5"
-                ]
-            ]
+        if (newProgress < 0) {
+            newProgress = 0
         }
-    ],
-    line: [
-        {
-            width: 0.35,
-            outlineC: "#68ef67",
-            lines: [
-                [
-                    "R8C3",
-                    "R8C4",
-                    "R8C5",
-                    "R8C6",
-                    "R7C7",
-                    "R6C7",
-                    "R5C7"
-                ]
-            ]
+
+        progress = newProgress
+        const code = newRed ? redPuzzleCodes[newProgress] : puzzleCodes[newProgress]
+        if (code !== undefined) {
+            importPuzzle(code, true)
         }
-    ],
-    littlekillersum: [
-        {
-            cell: "R4C10",
-            cells: [
-                "R5C9",
-                "R6C8",
-                "R7C7",
-                "R8C6",
-                "R9C5"
-            ],
-            direction: "DL",
-            value: "14"
+        const str = newProgress.toString()
+        if (str !== mediaSeekBar.value) {
+            mediaSeekBar.value = str
         }
-    ]
-})
+        mediaProgress.innerText = `${newProgress} / ${puzzleCodes.length - 1}`
+    }
+    mediaSeekBar.min = progress.toString()
+    mediaSeekBar.max = (puzzleCodes.length - 1).toString()
+    mediaSeekBar.value = progress.toString()
+    mediaSeekBar.addEventListener("input", (e) => {
+        setProgress(Number.parseInt(mediaSeekBar.value), showRed)
+    })
+    mediaBack.addEventListener("click", (e) => {
+        setProgress(progress - 1, showRed)
+    })
+    mediaForward.addEventListener("click", (e) => {
+        setProgress(progress + 1, showRed)
+    })
+    mediaRefresh.addEventListener("click", (e) => {
+        setProgress(progress, showRed)
+    })
 
-console.log("\nPuzzle\n\n")
-const url = puzzle.toFPuzzlesUrl()
-console.log(url)
+    const nextFrame = () => {
+        setProgress(progress + 1, showRed)
+    }
 
-
-const puzzleCodes: string[] = []
-const redPuzzleCodes: string[] = []
-
-puzzleCodes.push(puzzle.toFPuzzlesEncoding())
-redPuzzleCodes.push(puzzle.toFPuzzlesEncoding())
-for (let d = 1; d <= 9; d++) {
-    for (let r = 0; r < 9; r++) {
-        for (let c = 0; c < 9; c++) {
-            puzzle.data.grid[r]![c]!.value = d
-            puzzleCodes.push(puzzle.toFPuzzlesEncoding())
-            puzzle.data.grid[r]![c]!.highlight = "#FFA0A0"
-            redPuzzleCodes.push(puzzle.toFPuzzlesEncoding())
-            puzzle.data.grid[r]![c]!.highlight = undefined
+    let intervalID: number | null = null
+    const setInterval = (isPlaying: boolean, newSpeed: number) => {
+        if (intervalID !== null) {
+            window.clearInterval(intervalID)
+            intervalID = null
+        }
+        if (isPlaying) {
+            intervalID = window.setInterval(nextFrame, 1000 / newSpeed)
         }
     }
-}
 
-
-declare function prInit(puzzleCodes: string[], redPuzzleCodes: string[]): void
-
-async function runBrowser() {
-    const browser = await chromium.launch({ headless: false, args: ["--start-maximized"] })
-    const context = await browser.newContext({ viewport: null })
-    const page = await context.newPage();
-    page.on('close', () => {
-        process.exit(0);
+    let playing = false
+    const setPlaying = (isPlaying: boolean) => {
+        if (isPlaying && progress >= puzzleCodes.length - 1) {
+            setProgress(0, showRed)
+        }
+        playing = isPlaying
+        mediaPlay.innerText = (isPlaying ? "Pause" : "Play") + " [W]"
+        setInterval(isPlaying, speed)
+    }
+    mediaPlay.addEventListener("click", (e) => {
+        setPlaying(!playing)
     })
-    await page.goto(url)
 
-    await page.addStyleTag({ path: './window/puzzleWindow.css' });
-    await page.addScriptTag({ path: './build/sudoku/windowScript.js' })
 
-    const htmlContent = readFileSync('./window/puzzleWindow.html', 'utf-8');
+    let speed = 4
+    const setSpeed = (newSpeed: number) => {
+        speed = newSpeed
+        const str = newSpeed.toString()
+        if (str !== mediaSpeed.value) {
+            mediaSpeed.value = str
+        }
+        setInterval(playing, newSpeed)
+    }
+    const changeSpeedIndex = (offset: number) => {
+        const values = [...mediaSpeed.options].map(o => Number.parseFloat(o.value))
+        const oldIndex = values.findIndex((v) => speed == v)
+        const newIndex = oldIndex + offset
+        if (newIndex < 0) {
+            setSpeed(values[0]!)
+        } else if (newIndex >= values.length) {
+            setSpeed(values[values.length - 1]!)
+        } else {
+            setSpeed(values[newIndex]!)
+        }
+    }
+    mediaSpeed.addEventListener("change", (e) => {
+        setSpeed(Number.parseFloat(mediaSpeed.value))
+    })
 
-    await page.evaluate(([html, codes, redCodes]) => {
-        document.body.insertAdjacentHTML("beforeend", html)
-        prInit(codes, redCodes)
-    }, [htmlContent, puzzleCodes, redPuzzleCodes] as const)
+
+    let showRed = true
+    const setShowRed = (newRed: boolean) => {
+        showRed = newRed
+        setProgress(progress, newRed)
+        mediaShowRed.innerText = (newRed ? "Disable Red" : "Enable Red") + " [R]"
+    }
+    mediaShowRed.addEventListener("click", (e) => {
+        setShowRed(!showRed)
+    })
+
+
+    setProgress(0, showRed)
+    setPlaying(false)
+    setSpeed(4)
+    setShowRed(true)
+
+    document.addEventListener("keydown", (e) => {
+        switch (e.key) {
+            case "w":
+                if (!e.repeat) {
+                    setPlaying(!playing)
+                }
+                break
+            case "a":
+                setProgress(progress - 1, showRed)
+                break
+            case "d":
+                setProgress(progress + 1, showRed)
+                break
+            case "r":
+                if (!e.repeat) {
+                    setShowRed(!showRed)
+                }
+                break
+            case "q":
+                if (!e.repeat) {
+                    setProgress(progress, showRed)
+                }
+                break
+            case "n":
+                changeSpeedIndex(-1)
+                break
+            case "m":
+                changeSpeedIndex(1)
+                break
+            default:
+                return
+        }
+        e.preventDefault()
+        e.stopPropagation()
+    });
+
+    console.log("Puzzle Viewer Script Loaded")
 }
-
-runBrowser()

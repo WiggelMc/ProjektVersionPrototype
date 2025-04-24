@@ -1,17 +1,23 @@
 declare function importPuzzle(string: string, clearHistory: boolean): void
+declare const puzzleTimer: { shown: boolean }
 
 export function prInit(puzzleCodes: string[], redPuzzleCodes: string[]) {
-    console.log("Hello")
+
+    puzzleTimer.shown = false
+
+
     const mediaSeekBar = document.getElementById("media-seek-bar") as HTMLInputElement
+    const mediaRefresh = document.getElementById("media-refresh") as HTMLButtonElement
     const mediaPlay = document.getElementById("media-play") as HTMLButtonElement
     const mediaProgress = document.getElementById("media-progress") as HTMLParagraphElement
     const mediaBack = document.getElementById("media-back") as HTMLButtonElement
     const mediaForward = document.getElementById("media-forward") as HTMLButtonElement
     const mediaSpeed = document.getElementById("media-speed") as HTMLSelectElement
+    const mediaShowRed = document.getElementById("media-show-red") as HTMLButtonElement
 
 
     let progress = 0
-    const setProgress = (newProgress: number) => {
+    const setProgress = (newProgress: number, newRed: boolean) => {
         if (newProgress >= puzzleCodes.length) {
             setPlaying(false)
             newProgress = puzzleCodes.length - 1
@@ -21,7 +27,7 @@ export function prInit(puzzleCodes: string[], redPuzzleCodes: string[]) {
         }
 
         progress = newProgress
-        const code = puzzleCodes[newProgress]
+        const code = newRed ? redPuzzleCodes[newProgress] : puzzleCodes[newProgress]
         if (code !== undefined) {
             importPuzzle(code, true)
         }
@@ -35,17 +41,20 @@ export function prInit(puzzleCodes: string[], redPuzzleCodes: string[]) {
     mediaSeekBar.max = (puzzleCodes.length - 1).toString()
     mediaSeekBar.value = progress.toString()
     mediaSeekBar.addEventListener("input", (e) => {
-        setProgress(Number.parseInt(mediaSeekBar.value))
+        setProgress(Number.parseInt(mediaSeekBar.value), showRed)
     })
     mediaBack.addEventListener("click", (e) => {
-        setProgress(progress - 1)
+        setProgress(progress - 1, showRed)
     })
     mediaForward.addEventListener("click", (e) => {
-        setProgress(progress + 1)
+        setProgress(progress + 1, showRed)
+    })
+    mediaRefresh.addEventListener("click", (e) => {
+        setProgress(progress, showRed)
     })
 
     const nextFrame = () => {
-        setProgress(progress + 1)
+        setProgress(progress + 1, showRed)
     }
 
     let intervalID: number | null = null
@@ -55,17 +64,17 @@ export function prInit(puzzleCodes: string[], redPuzzleCodes: string[]) {
             intervalID = null
         }
         if (isPlaying) {
-            intervalID = window.setInterval(nextFrame, 1000 / speed) 
+            intervalID = window.setInterval(nextFrame, 1000 / newSpeed)
         }
     }
 
     let playing = false
     const setPlaying = (isPlaying: boolean) => {
         if (isPlaying && progress >= puzzleCodes.length - 1) {
-            setProgress(0)
+            setProgress(0, showRed)
         }
         playing = isPlaying
-        mediaPlay.innerText = isPlaying ? "Pause" : "Play"
+        mediaPlay.innerText = (isPlaying ? "Pause" : "Play") + " [W]"
         setInterval(isPlaying, speed)
     }
     mediaPlay.addEventListener("click", (e) => {
@@ -82,12 +91,74 @@ export function prInit(puzzleCodes: string[], redPuzzleCodes: string[]) {
         }
         setInterval(playing, newSpeed)
     }
+    const changeSpeedIndex = (offset: number) => {
+        const values = [...mediaSpeed.options].map(o => Number.parseFloat(o.value))
+        const oldIndex = values.findIndex((v) => speed == v)
+        const newIndex = oldIndex + offset
+        if (newIndex < 0) {
+            setSpeed(values[0]!)
+        } else if (newIndex >= values.length) {
+            setSpeed(values[values.length - 1]!)
+        } else {
+            setSpeed(values[newIndex]!)
+        }
+    }
     mediaSpeed.addEventListener("change", (e) => {
         setSpeed(Number.parseFloat(mediaSpeed.value))
     })
 
 
-    setProgress(0)
+    let showRed = true
+    const setShowRed = (newRed: boolean) => {
+        showRed = newRed
+        setProgress(progress, newRed)
+        mediaShowRed.innerText = (newRed ? "Disable Red" : "Enable Red") + " [R]"
+    }
+    mediaShowRed.addEventListener("click", (e) => {
+        setShowRed(!showRed)
+    })
+
+
+    setProgress(0, showRed)
     setPlaying(false)
     setSpeed(4)
+    setShowRed(true)
+
+    document.addEventListener("keydown", (e) => {
+        switch (e.key) {
+            case "w":
+                if (!e.repeat) {
+                    setPlaying(!playing)
+                }
+                break
+            case "a":
+                setProgress(progress - 1, showRed)
+                break
+            case "d":
+                setProgress(progress + 1, showRed)
+                break
+            case "r":
+                if (!e.repeat) {
+                    setShowRed(!showRed)
+                }
+                break
+            case "q":
+                if (!e.repeat) {
+                    setProgress(progress, showRed)
+                }
+                break
+            case "n":
+                changeSpeedIndex(-1)
+                break
+            case "m":
+                changeSpeedIndex(1)
+                break
+            default:
+                return
+        }
+        e.preventDefault()
+        e.stopPropagation()
+    });
+
+    console.log("Puzzle Viewer Script Loaded")
 }

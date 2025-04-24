@@ -1,6 +1,10 @@
 <div id="pr-side-bar" class="pr-bar">
     <div>
-
+        <div>
+            <p>List of other Paths</p>
+            <p>Logic Step History (also show as graph above seek-bar)</p>
+            <p>Explanation of Current Logic Step</p>
+        </div>
     </div>
 </div>
 <div id="pr-bottom-bar" class="pr-bar">
@@ -10,20 +14,24 @@
                 <input type="range" min="1" max="100" value="50" class="media-slider" id="media-seek-bar">
             </div>
             <div>
-                <button class="media-button" id="media-play">Play</button>
-                <p class="media-text" id="media-progress">100 / 200</p>
-                <button class="media-button" id="media-back">Back</button>
-                <button class="media-button" id="media-forward">Forward</button>
+                <button class="media-button" id="media-refresh">Refresh [Q]</button>
+                <button class="media-button" id="media-play"></button>
+                <p class="media-text" id="media-progress"></p>
+                <button class="media-button" id="media-back">Back [A]</button>
+                <button class="media-button" id="media-forward">Forward [D]</button>
                 <select class="media-select" id="media-speed">
-                    <option value="1">1</option>
-                    <option value="2">2</option>
-                    <option value="4">4</option>
-                    <option value="8">8</option>
-                    <option value="16">16</option>
-                    <option value="32">32</option>
-                    <option value="64">64</option>
-                    <option value="128">128</option>
+                    <option value="1">1 [N] [M]</option>
+                    <option value="2">2 [N] [M]</option>
+                    <option value="3">3 [N] [M]</option>
+                    <option value="4">4 [N] [M]</option>
+                    <option value="6">6 [N] [M]</option>
+                    <option value="8">8 [N] [M]</option>
+                    <option value="16">16 [N] [M]</option>
+                    <option value="32">32 [N] [M]</option>
+                    <option value="64">64 [N] [M]</option>
+                    <option value="128">128 [N] [M]</option>
                 </select>
+                <button class="media-button" id="media-show-red"></button>
             </div>
         </div>
     </div>

@@ -73,6 +73,7 @@ const puzzleCodes: string[] = []
 const redPuzzleCodes: string[] = []
 
 puzzleCodes.push(puzzle.toFPuzzlesEncoding())
+redPuzzleCodes.push(puzzle.toFPuzzlesEncoding())
 for (let d = 1; d <= 9; d++) {
     for (let r = 0; r < 9; r++) {
         for (let c = 0; c < 9; c++) {
@@ -86,7 +87,6 @@ for (let d = 1; d <= 9; d++) {
 }
 
 
-declare function importPuzzle(string: string, clearHistory: boolean): void
 declare function prInit(puzzleCodes: string[], redPuzzleCodes: string[]): void
 
 async function runBrowser() {
@@ -107,19 +107,6 @@ async function runBrowser() {
         document.body.insertAdjacentHTML("beforeend", html)
         prInit(codes, redCodes)
     }, [htmlContent, puzzleCodes, redPuzzleCodes] as const)
-
-    // let counter = 0
-
-    // function startTimeout() {
-    //     setTimeout(async () => {
-    //         puzzle.data.author = `Peter ${counter++}`
-    //         await page.evaluate((code) => {
-    //             importPuzzle(code, true)
-    //         }, puzzleCodes[counter % puzzleCodes.length]!)
-    //         startTimeout()
-    //     }, 100)
-    // }
-    // startTimeout()
 }
 
 runBrowser()

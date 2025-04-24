@@ -162,14 +162,52 @@ export class Puzzle {
         return JSON.stringify(this.data)
     }
 
+    toSudokuPadJson(first: boolean = false): string {
+        const clone: PuzzleData = JSON.parse(JSON.stringify(this.data))
+        for (const row of clone.grid ?? []) {
+            for (const cell of row) {
+                if (cell.value !== undefined) {
+                    cell.given = true
+                }
+
+                if (first) {
+                    cell.centerPencilMarks = undefined
+                    cell.cornerPencilMarks = undefined
+                }
+
+                if (cell.given) {
+                    cell.centerPencilMarks = undefined
+                    cell.cornerPencilMarks = undefined
+                }
+
+                if (cell.highlight !== undefined) {
+                    cell.c = cell.highlight
+                    cell.highlight = undefined
+                }
+            }
+        }
+
+        return JSON.stringify(clone)
+    }
+
     toFPuzzlesEncoding(): string {
         const json = this.toFPuzzlesJson()
         return compressToBase64(json)
     }
 
+    toSudokuPadEncoding(first: boolean = false): string {
+        const json = this.toSudokuPadJson(first)
+        return `fpuzzles${compressToBase64(json)}`
+    }
+
     toFPuzzlesUrl(): string {
         const encoding = this.toFPuzzlesEncoding()
         return `https://www.f-puzzles.com/?load=${encoding}`
+    }
+
+    toSudokuPadUrl(first: boolean = false): string {
+        const encoding = this.toSudokuPadEncoding(first)
+        return `https://sudokupad.app/scf?puzzleid=${encoding}`
     }
 }
 

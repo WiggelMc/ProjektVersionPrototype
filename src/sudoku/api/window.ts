@@ -1,10 +1,12 @@
-declare function importPuzzle(string: string, clearHistory: boolean): void
-declare const puzzleTimer: { shown: boolean }
+declare function prApiLoadPuzzle(code: string): Promise<void>
+declare function prApiInit(puzzleCodes: string[], redPuzzleCodes: string[]): void
 
-export function prInit(puzzleCodes: string[], redPuzzleCodes: string[]) {
+export function prInit(html: string, puzzleCodes: string[], redPuzzleCodes: string[]) {
+    document.body.insertAdjacentHTML("beforeend", html)
+    prApiInit(puzzleCodes, redPuzzleCodes)
 
-    puzzleTimer.shown = false
-
+    let isRendering = false
+    let renderStack: string | null = null
 
     const mediaSeekBar = document.getElementById("media-seek-bar") as HTMLInputElement
     const mediaRefresh = document.getElementById("media-refresh") as HTMLButtonElement
@@ -16,8 +18,29 @@ export function prInit(puzzleCodes: string[], redPuzzleCodes: string[]) {
     const mediaShowRed = document.getElementById("media-show-red") as HTMLButtonElement
 
 
+    const render = async (code: string) => {
+        renderStack = code
+        renderStack = code
+
+        if (!isRendering) {
+            isRendering = true
+
+            while (renderStack !== null) {
+                while (renderStack !== null) {
+                    isRendering = true
+
+                    const nextCode = renderStack
+                    renderStack = null
+
+                    await prApiLoadPuzzle(nextCode)
+                }
+                isRendering = false
+            }
+        }
+    }
+
     let progress = 0
-    const setProgress = (newProgress: number, newRed: boolean) => {
+    const setProgress = async (newProgress: number, newRed: boolean) => {
         if (newProgress >= puzzleCodes.length) {
             setPlaying(false)
             newProgress = puzzleCodes.length - 1
@@ -29,7 +52,7 @@ export function prInit(puzzleCodes: string[], redPuzzleCodes: string[]) {
         progress = newProgress
         const code = newRed ? redPuzzleCodes[newProgress] : puzzleCodes[newProgress]
         if (code !== undefined) {
-            importPuzzle(code, true)
+            render(code)
         }
         const str = newProgress.toString()
         if (str !== mediaSeekBar.value) {

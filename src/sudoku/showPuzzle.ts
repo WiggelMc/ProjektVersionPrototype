@@ -64,30 +64,54 @@ const puzzle: Puzzle = new Puzzle({
     ]
 })
 
+
+const engine: "fpuzzles" | "sudokupad" = "fpuzzles"
+
+
+function encode(puzzle: Puzzle, first: boolean = false): string {
+    switch (engine) {
+        case "fpuzzles":
+            return puzzle.toFPuzzlesEncoding()
+        case "sudokupad":
+            return puzzle.toSudokuPadEncoding(first)
+    }
+}
+
+function toUrl(puzzle: Puzzle): string {
+    switch (engine) {
+        case "fpuzzles":
+            return puzzle.toFPuzzlesUrl()
+        case "sudokupad":
+            return puzzle.toSudokuPadUrl()
+    }
+}
+
 console.log("\nPuzzle\n\n")
-const url = puzzle.toFPuzzlesUrl()
+const url = toUrl(puzzle)
 console.log(url)
 
 
 const puzzleCodes: string[] = []
 const redPuzzleCodes: string[] = []
 
-puzzleCodes.push(puzzle.toFPuzzlesEncoding())
-redPuzzleCodes.push(puzzle.toFPuzzlesEncoding())
+puzzleCodes.push(encode(puzzle, true))
+redPuzzleCodes.push(encode(puzzle, true))
 for (let d = 1; d <= 9; d++) {
     for (let r = 0; r < 9; r++) {
         for (let c = 0; c < 9; c++) {
-            puzzle.data.grid[r]![c]!.value = d
-            puzzleCodes.push(puzzle.toFPuzzlesEncoding())
+            const value = (c + 3*r + Math.floor(r/3) + d - 1) % 9 + 1
+            puzzle.data.grid[r]![c]!.value = value
+            puzzleCodes.push(encode(puzzle))
             puzzle.data.grid[r]![c]!.highlight = "#FFA0A0"
-            redPuzzleCodes.push(puzzle.toFPuzzlesEncoding())
+            redPuzzleCodes.push(encode(puzzle))
             puzzle.data.grid[r]![c]!.highlight = undefined
         }
     }
 }
 
+console.log(redPuzzleCodes[20])
 
-declare function prInit(puzzleCodes: string[], redPuzzleCodes: string[]): void
+declare function prInit(html: string, puzzleCodes: string[], redPuzzleCodes: string[]): void
 
 async function runBrowser() {
     const browser = await chromium.launch({ headless: false, args: ["--start-maximized"] })
@@ -98,14 +122,23 @@ async function runBrowser() {
     })
     await page.goto(url)
 
-    await page.addStyleTag({ path: './window/puzzleWindow.css' });
-    await page.addScriptTag({ path: './build/sudoku/puzzleWindow.js' })
+    switch (engine) {
+        case "fpuzzles":
+            await page.addStyleTag({ path: './window/fpuzzles.css' });
+            await page.addScriptTag({ path: './build/sudoku/api/fpuzzles.js' })
+            break
+        case "sudokupad":
+            await page.addStyleTag({ path: './window/sudokupad.css' });
+            await page.addScriptTag({ path: './build/sudoku/api/sudokupad.js' })
+            break
+    }
 
-    const htmlContent = readFileSync('./window/puzzleWindow.html', 'utf-8');
+    await page.addStyleTag({ path: './window/window.css' });
+    await page.addScriptTag({ path: './build/sudoku/api/window.js' })
+    const htmlContent = readFileSync('./window/window.html', 'utf-8');
 
     await page.evaluate(([html, codes, redCodes]) => {
-        document.body.insertAdjacentHTML("beforeend", html)
-        prInit(codes, redCodes)
+        prInit(html, codes, redCodes)
     }, [htmlContent, puzzleCodes, redPuzzleCodes] as const)
 }
 

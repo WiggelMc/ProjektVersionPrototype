@@ -1,0 +1,7 @@
+#everything {
+    width: min(80vh * 16 / 9, 80vw) !important;
+    height: min(80vw * 9 / 16, 80vh) !important;
+    left: 0% !important; 
+    transform: translate(0%) !important; 
+    top: 0vh !important;
+}

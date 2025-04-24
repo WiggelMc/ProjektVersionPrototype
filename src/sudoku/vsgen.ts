@@ -1,4 +1,4 @@
-import { Command, Option } from "commander"
+import { Command, Option } from 'commander'
 
 const program = new Command()
 
@@ -7,8 +7,27 @@ function allowMultiple(value: string, previous: string[] | undefined): string[] 
 }
 
 function error(message: string): never {
-    console.error(`error: ${message}`);
-    process.exit(1);
+    console.error(`error: ${message}`)
+    process.exit(1)
+}
+
+async function requiredWithPipe(optionName: string, optionValue: string | undefined): Promise<string> {
+    if (optionValue !== undefined) {
+        return optionValue
+    }
+
+    if (!process.stdin.isTTY) {
+        return new Promise((resolve) => {
+            let input = ''
+            process.stdin.setEncoding('utf8')
+
+            process.stdin.on('data', chunk => input += chunk)
+            process.stdin.on('end', () => resolve(input.trimEnd()))
+            process.stdin.on('error', err => error("error reading stdin"))
+        })
+    } else {
+        error(`required option '${optionName}' not specified or piped`)
+    }
 }
 
 
@@ -27,37 +46,55 @@ program
 
 
 type GenerateOptions = {
-    config: string
-    out: string[]
+    config?: string
+    out?: string[]
     cache: boolean
 }
 
 program
     .command('generate')
     .description('Generate a Sudoku')
-    .requiredOption('-c, --config <file>', 'Config File')
-    .requiredOption('-o, --out <file>', 'Output File', allowMultiple)
+    .option('-c, --config <file>', 'Config File')
+    .option('-o, --out <file>', 'Output File', allowMultiple)
     .option('-n, --no-cache', 'Disable creation and lookup of Cache Files', true)
-    .action((options: GenerateOptions) => {
-        console.log('generate Command:', options);
+    .action(async (options: GenerateOptions) => {
+
+        options.config = await requiredWithPipe('-c, --config <file>', options.config)
+
+        console.error('generate Command:', options)
+
+        if (options.out === undefined) {
+            console.log('output goes to stdout')
+        } else {
+            console.log('writing output to file')
+        }
     })
 
 type AnalyseOptions = {
-    puzzle: string
+    puzzle?: string
     config: string
-    out: string[]
+    out?: string[]
     cache: boolean
 }
 
 program
     .command('analyse')
     .description('Analyse the Solution Paths of a Sudoku')
-    .requiredOption('-p, --puzzle <file>', 'Puzzle File')
+    .option('-p, --puzzle <file>', 'Puzzle File')
     .requiredOption('-c, --config <file>', 'Config File')
-    .requiredOption('-o, --out <file>', 'Output File', allowMultiple)
+    .option('-o, --out <file>', 'Output File', allowMultiple)
     .option('-n, --no-cache', 'Disable creation and lookup of Cache Files', true)
-    .action((options: AnalyseOptions) => {
-        console.log('analyse Command:', options);
+    .action(async (options: AnalyseOptions) => {
+
+        options.puzzle = await requiredWithPipe('-p, --puzzle <file>', options.puzzle)
+
+        console.error('analyse Command:', options)
+
+        if (options.out === undefined) {
+            console.log('output goes to stdout')
+        } else {
+            console.log('writing output to file')
+        }
     })
 
 
@@ -70,7 +107,7 @@ const showEngines = [
 ] as const
 
 type ShowOptions = {
-    puzzle: string
+    puzzle?: string
     analysis?: string
     engine: typeof showEngines[number]
 }
@@ -78,11 +115,14 @@ type ShowOptions = {
 program
     .command('show')
     .description('Show a Sudoku in the selected Engine')
-    .requiredOption('-p, --puzzle <file>', 'Puzzle File')
+    .option('-p, --puzzle <file>', 'Puzzle File')
     .option('-a, --analysis <file>', 'Analysis File')
     .addOption(new Option('-e, --engine <engine>', 'Puzzle Engine to start').choices(showEngines).makeOptionMandatory())
-    .action((options: ShowOptions) => {
-        console.log('show Command:', options);
+    .action(async (options: ShowOptions) => {
+
+        options.puzzle = await requiredWithPipe('-p, --puzzle <file>', options.puzzle)
+
+        console.error('show Command:', options)
     })
 
 
@@ -100,8 +140,8 @@ const exportFormats = [
 ] as const
 
 type ExportOptions = {
-    puzzle: string
-    out: string[]
+    puzzle?: string
+    out?: string[]
     engine: typeof exportEngines[number]
     format: typeof exportFormats[number]
 }
@@ -109,32 +149,41 @@ type ExportOptions = {
 program
     .command('export')
     .description('Export a Sudoku to the specified Format')
-    .requiredOption('-p, --puzzle <file>', 'Puzzle File')
-    .requiredOption('-o, --out <file>', 'Output File', allowMultiple)
+    .option('-p, --puzzle <file>', 'Puzzle File')
+    .option('-o, --out <file>', 'Output File', allowMultiple)
     .addOption(new Option('-e, --engine <engine>', 'Puzzle Engine to export to').choices(exportEngines).makeOptionMandatory())
     .addOption(new Option('-f, --format <format>', 'Export Format').choices(exportFormats).makeOptionMandatory())
-    .action((options: ExportOptions) => {
-        console.log('show Command:', options);
+    .action(async (options: ExportOptions) => {
+
+        options.puzzle = await requiredWithPipe('-p, --puzzle <file>', options.puzzle)
+
+        console.error('show Command:', options)
+
+        if (options.out === undefined) {
+            console.log('output goes to stdout')
+        } else {
+            console.log('writing output to file')
+        }
     })
 
 
 
 type WatchOptions = {
-    config: string
+    config?: string
     out?: string[]
     cache: boolean
     analyse?: string
-    "analysis-out"?: string[]
+    'analysis-out'?: string[]
     show?: typeof showEngines[number]
-    "export-engine"?: typeof exportEngines[number]
-    "export-format"?: typeof exportFormats[number]
-    "on-success"?: string[]
+    'export-engine'?: typeof exportEngines[number]
+    'export-format'?: typeof exportFormats[number]
+    'on-success'?: string[]
 }
 
 program
     .command('watch')
     .description('Watch for file changes in Config Files and regenerate, when changes are detected')
-    .requiredOption('-c, --config <file>', 'Config File')
+    .option('-c, --config <file>', 'Config File')
     .option('-o, --out <file>', 'Output File', allowMultiple)
     .option('-n, --no-cache', 'Disable creation and lookup of Cache Files', true)
     .option('-a, --analyse <file>', 'Analysis Config File')
@@ -143,44 +192,57 @@ program
     .addOption(new Option('-e, --export-engine <engine>', 'Puzzle Engine to export to').choices(exportEngines))
     .addOption(new Option('-f, --export-format <format>', 'Export Format').choices(exportFormats))
     .option('-t, --on-success <command>', 'Run after successful Generation', allowMultiple)
-    .action((options: WatchOptions) => {
-        if (options["analysis-out"] !== undefined && options.analyse === undefined)
-            error("analysis-out Option requires analyse Option to be specified")
+    .action(async (options: WatchOptions) => {
 
-        if ((options["export-engine"] === undefined) != (options["export-format"] === undefined))
-            error("export-engine and export-format must either both be specified or omitted")
+        options.config = await requiredWithPipe('-c, --config <file>', options.config)
+
+        if (options['analysis-out'] !== undefined && options.analyse === undefined)
+            error('analysis-out Option requires analyse Option to be specified')
+
+        if ((options['export-engine'] === undefined) != (options['export-format'] === undefined))
+            error('export-engine and export-format must either both be specified or omitted')
+
+        console.error('generate Command:', options)
 
         if ([
             options.out,
             options.analyse,
-            options["analysis-out"],
+            options['analysis-out'],
             options.show,
-            options["export-engine"],
-            options["export-format"]
-        ].every((e) => e === undefined))
-            error("at least one output option must be specified")
-
-        console.log('generate Command:', options);
+            options['export-engine'],
+            options['export-format']
+        ].every((e) => e === undefined)) {
+            console.log('output goes to stdout')
+        } else {
+            console.log('writing output to file')
+        }
     })
 
 
 
 type JsonSchemaOptions = {
-    out: string[]
+    out?: string[]
 }
 
 program
     .command('json-schema')
     .description('Dump Json Schemas in the specified Directory')
-    .requiredOption('-o, --out <dir>', 'Output Directory', allowMultiple)
+    .option('-o, --out <dir>', 'Output Directory', allowMultiple)
     .action((options: JsonSchemaOptions) => {
-        console.log('json-schema Command:', options);
+
+        console.error('json-schema Command:', options)
+
+        if (options.out === undefined) {
+            console.log('output goes to stdout')
+        } else {
+            console.log('writing output to file')
+        }
     })
 
 
 
 type ClearCacheOptions = {
-    "dry-run": boolean
+    'dry-run': boolean
 }
 
 program
@@ -188,7 +250,8 @@ program
     .description('Clear all caches')
     .option('-d, --dry-run', 'Display Files that will be deleted, but don\'t delete anything', false)
     .action((options: ClearCacheOptions) => {
-        console.log('clear-cache Command:', options);
+
+        console.error('clear-cache Command:', options)
     })
 
 

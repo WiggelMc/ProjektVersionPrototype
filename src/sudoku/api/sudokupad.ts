@@ -34,6 +34,10 @@ declare const Framework: {
 }
 
 async function prApiLoadPuzzle(code: string) {
+    //TODO: Maybe fix with loadProgress / replayPlay(..., { speed: -1 })
+    // eg. load puzzle only when changed, otherwise only load progress (would also make marks better)
+    // also, we would need another format for this: ShowFormat, which is an object in the format that the engine requires
+
     return PuzzleLoader.parsePuzzleData(code).then((puzzle) => {
 
         return PuzzleLoader.parsePuzzleData(window.firstPuzzle!).then(async (firstPuzzle) => {

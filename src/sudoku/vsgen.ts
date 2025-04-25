@@ -109,6 +109,7 @@ const showEngines = [
 type ShowOptions = {
     puzzle?: string
     analysis?: string
+    'keep-around': boolean
     engine: typeof showEngines[number]
 }
 
@@ -117,6 +118,7 @@ program
     .description('Show a Sudoku in the selected Engine')
     .option('-p, --puzzle <file>', 'Puzzle File')
     .option('-a, --analysis <file>', 'Analysis File')
+    .option('-k, --keep-around', 'Keep Window around after exiting the Process', false)
     .addOption(new Option('-e, --engine <engine>', 'Puzzle Engine to start').choices(showEngines).makeOptionMandatory())
     .action(async (options: ShowOptions) => {
 
@@ -175,6 +177,7 @@ type WatchOptions = {
     analyse?: string
     'analysis-out'?: string[]
     show?: typeof showEngines[number]
+    'keep-around': boolean
     'export-engine'?: typeof exportEngines[number]
     'export-format'?: typeof exportFormats[number]
     'on-success'?: string[]
@@ -189,6 +192,7 @@ program
     .option('-a, --analyse <file>', 'Analysis Config File')
     .option('-g, --analysis-out <file>', 'Analysis Output File', allowMultiple)
     .addOption(new Option('-s, --show <engine>', 'Puzzle Engine to start').choices(showEngines))
+    .option('-k, --keep-around', 'Keep Window around after exiting the Process', false)
     .addOption(new Option('-e, --export-engine <engine>', 'Puzzle Engine to export to').choices(exportEngines))
     .addOption(new Option('-f, --export-format <format>', 'Export Format').choices(exportFormats))
     .option('-t, --on-success <command>', 'Run after successful Generation', allowMultiple)

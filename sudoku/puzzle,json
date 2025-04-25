@@ -1,5 +1,5 @@
 {
-  "$schema": "puzzle.schema.json",
+  "$schema": "./puzzle.schema.json",
   "size": 9,
   "title": "Custom Sudoku",
   "author": "Some Author",

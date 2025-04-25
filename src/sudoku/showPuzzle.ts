@@ -99,7 +99,7 @@ redPuzzleCodes.push(encode(puzzle, true))
 for (let d = 1; d <= 9; d++) {
     for (let r = 0; r < 9; r++) {
         for (let c = 0; c < 9; c++) {
-            const value = (c + 3*r + Math.floor(r/3) + d - 1) % 9 + 1
+            const value = (c + 3 * r + Math.floor(r / 3) + d - 1) % 9 + 1
             puzzle.data.grid[r]![c]!.value = value
             puzzleCodes.push(encode(puzzle))
             puzzle.data.grid[r]![c]!.highlight = "#FFA0A0"
@@ -124,18 +124,18 @@ async function runBrowser() {
 
     switch (engine) {
         case "fpuzzles":
-            await page.addStyleTag({ path: './window/fpuzzles.css' });
+            await page.addStyleTag({ path: './window/fpuzzles.css' })
             await page.addScriptTag({ path: './build/sudoku/api/fpuzzles.js' })
             break
         case "sudokupad":
-            await page.addStyleTag({ path: './window/sudokupad.css' });
+            await page.addStyleTag({ path: './window/sudokupad.css' })
             await page.addScriptTag({ path: './build/sudoku/api/sudokupad.js' })
             break
     }
 
-    await page.addStyleTag({ path: './window/window.css' });
+    await page.addStyleTag({ path: './window/window.css' })
     await page.addScriptTag({ path: './build/sudoku/api/window.js' })
-    const htmlContent = readFileSync('./window/window.html', 'utf-8');
+    const htmlContent = readFileSync('./window/window.html', 'utf-8')
 
     await page.evaluate(([html, codes, redCodes]) => {
         prInit(html, codes, redCodes)

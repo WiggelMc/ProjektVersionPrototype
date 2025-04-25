@@ -9,7 +9,8 @@
       "type": "string"
     },
     "size": {
-      "type": "integer"
+      "type": "integer",
+      "description": "The Sidelength of the Sudoku"
     },
     "title": {
       "type": "string"

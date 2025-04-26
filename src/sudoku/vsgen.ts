@@ -138,7 +138,8 @@ const exportEngines = [
 const exportFormats = [
     'json',
     'url',
-    'encoded'
+    'encoded',
+    'png'
 ] as const
 
 type ExportOptions = {

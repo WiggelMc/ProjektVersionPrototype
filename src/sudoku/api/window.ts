@@ -1,12 +1,14 @@
-declare function prApiLoadPuzzle(code: string): Promise<void>
-declare function prApiInit(puzzleCodes: string[], redPuzzleCodes: string[]): void
+import { PuzzlePacket, Packet } from "../sudoku"
 
-export function prInit(html: string, puzzleCodes: string[], redPuzzleCodes: string[]) {
+declare function prApiLoadPuzzle(puzzlePacket: PuzzlePacket, showRed: boolean): Promise<void>
+declare function prApiInit(puzzlePacket: Packet): void
+
+export function prInit(html: string, packet: Packet) {
     document.body.insertAdjacentHTML("beforeend", html)
-    prApiInit(puzzleCodes, redPuzzleCodes)
+    prApiInit(packet)
 
     let isRendering = false
-    let renderStack: string | null = null
+    let renderStack: PuzzlePacket | null = null
 
     const mediaSeekBar = document.getElementById("media-seek-bar") as HTMLInputElement
     const mediaRefresh = document.getElementById("media-refresh") as HTMLButtonElement
@@ -18,9 +20,9 @@ export function prInit(html: string, puzzleCodes: string[], redPuzzleCodes: stri
     const mediaShowRed = document.getElementById("media-show-red") as HTMLButtonElement
 
 
-    const render = async (code: string) => {
-        renderStack = code
-        renderStack = code
+    const render = async (puzzlePacket: PuzzlePacket) => {
+        renderStack = puzzlePacket
+        renderStack = puzzlePacket
 
         if (!isRendering) {
             isRendering = true
@@ -32,7 +34,7 @@ export function prInit(html: string, puzzleCodes: string[], redPuzzleCodes: stri
                     const nextCode = renderStack
                     renderStack = null
 
-                    await prApiLoadPuzzle(nextCode)
+                    await prApiLoadPuzzle(nextCode, showRed)
                 }
                 isRendering = false
             }
@@ -41,27 +43,27 @@ export function prInit(html: string, puzzleCodes: string[], redPuzzleCodes: stri
 
     let progress = 0
     const setProgress = async (newProgress: number, newRed: boolean) => {
-        if (newProgress >= puzzleCodes.length) {
+        if (newProgress >= packet.length) {
             setPlaying(false)
-            newProgress = puzzleCodes.length - 1
+            newProgress = packet.length - 1
         }
         if (newProgress < 0) {
             newProgress = 0
         }
 
         progress = newProgress
-        const code = newRed ? redPuzzleCodes[newProgress] : puzzleCodes[newProgress]
-        if (code !== undefined) {
-            render(code)
+        const puzzlePacket = packet[newProgress]
+        if (puzzlePacket !== undefined) {
+            render(puzzlePacket)
         }
         const str = newProgress.toString()
         if (str !== mediaSeekBar.value) {
             mediaSeekBar.value = str
         }
-        mediaProgress.innerText = `${newProgress} / ${puzzleCodes.length - 1}`
+        mediaProgress.innerText = `${newProgress} / ${packet.length - 1}`
     }
     mediaSeekBar.min = progress.toString()
-    mediaSeekBar.max = (puzzleCodes.length - 1).toString()
+    mediaSeekBar.max = (packet.length - 1).toString()
     mediaSeekBar.value = progress.toString()
     mediaSeekBar.addEventListener("input", (e) => {
         setProgress(Number.parseInt(mediaSeekBar.value), showRed)
@@ -93,7 +95,7 @@ export function prInit(html: string, puzzleCodes: string[], redPuzzleCodes: stri
 
     let playing = false
     const setPlaying = (isPlaying: boolean) => {
-        if (isPlaying && progress >= puzzleCodes.length - 1) {
+        if (isPlaying && progress >= packet.length - 1) {
             setProgress(0, showRed)
         }
         playing = isPlaying

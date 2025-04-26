@@ -1,8 +1,8 @@
 import { readFileSync } from "fs";
-import { grid, Puzzle } from "./sudoku";
+import { grid, FPuzzlesPuzzle, SudokuPadPuzzle, FPuzzlesPuzzlePacket, SudokuPadPuzzlePacket, PuzzlePacket, SudokuPadPacket, Packet } from "./sudoku";
 import { chromium } from "playwright";
 
-const puzzle: Puzzle = new Puzzle({
+const puzzle: FPuzzlesPuzzle = new FPuzzlesPuzzle({
     title: "Puzzle 1",
     author: "Kim",
     ruleset: "Normal Sudoku Rules apply.",
@@ -65,24 +65,25 @@ const puzzle: Puzzle = new Puzzle({
 })
 
 
-const engine: "fpuzzles" | "sudokupad" = "fpuzzles"
+type Engine = "fpuzzles" | "sudokupad"
 
+const engine: Engine = "sudokupad"
 
-function encode(puzzle: Puzzle, first: boolean = false): string {
+function toPacket(puzzle: FPuzzlesPuzzle, redPositions: ([row: number, column: number])[]) {
     switch (engine) {
         case "fpuzzles":
-            return puzzle.toFPuzzlesEncoding()
+            return puzzle.toPacket(redPositions)
         case "sudokupad":
-            return puzzle.toSudokuPadEncoding(first)
+            return SudokuPadPuzzle.fromFPuzzles(puzzle).toPacket(redPositions)
     }
 }
 
-function toUrl(puzzle: Puzzle): string {
+function toUrl(puzzle: FPuzzlesPuzzle): string {
     switch (engine) {
         case "fpuzzles":
-            return puzzle.toFPuzzlesUrl()
+            return puzzle.toUrl()
         case "sudokupad":
-            return puzzle.toSudokuPadUrl()
+            return SudokuPadPuzzle.fromFPuzzles(puzzle).toUrl()
     }
 }
 
@@ -90,28 +91,27 @@ console.log("\nPuzzle\n\n")
 const url = toUrl(puzzle)
 console.log(url)
 
+const sudokuPadPacket = {
+    puzzle: SudokuPadPuzzle.fromFPuzzles(puzzle).toEncoding()
+} as const satisfies Partial<SudokuPadPacket> 
+const puzzlePackets: PuzzlePacket[] = []
 
-const puzzleCodes: string[] = []
-const redPuzzleCodes: string[] = []
+puzzlePackets.push(toPacket(puzzle, []))
 
-puzzleCodes.push(encode(puzzle, true))
-redPuzzleCodes.push(encode(puzzle, true))
 for (let d = 1; d <= 9; d++) {
     for (let r = 0; r < 9; r++) {
         for (let c = 0; c < 9; c++) {
             const value = (c + 3 * r + Math.floor(r / 3) + d - 1) % 9 + 1
             puzzle.data.grid[r]![c]!.value = value
-            puzzleCodes.push(encode(puzzle))
-            puzzle.data.grid[r]![c]!.highlight = "#FFA0A0"
-            redPuzzleCodes.push(encode(puzzle))
-            puzzle.data.grid[r]![c]!.highlight = undefined
+
+            puzzlePackets.push(toPacket(puzzle, [[r + 1, c + 1]]))
         }
     }
 }
 
-console.log(redPuzzleCodes[20])
+console.log(puzzlePackets[20])
 
-declare function prInit(html: string, puzzleCodes: string[], redPuzzleCodes: string[]): void
+declare function prInit(html: string, packets: Packet): void
 
 async function runBrowser() {
     const browser = await chromium.launch({ headless: false, args: ["--start-maximized"] })
@@ -122,14 +122,24 @@ async function runBrowser() {
     })
     await page.goto(url)
 
+    
+    let packet: Packet
+
     switch (engine) {
         case "fpuzzles":
             await page.addStyleTag({ path: './window/fpuzzles.css' })
             await page.addScriptTag({ path: './build/sudoku/api/fpuzzles.js' })
+            packet = {
+                puzzles: puzzlePackets as FPuzzlesPuzzlePacket[]
+            }
             break
         case "sudokupad":
             await page.addStyleTag({ path: './window/sudokupad.css' })
             await page.addScriptTag({ path: './build/sudoku/api/sudokupad.js' })
+            packet = {
+                ...sudokuPadPacket,
+                replays: puzzlePackets as SudokuPadPuzzlePacket[]
+            }
             break
     }
 
@@ -137,9 +147,9 @@ async function runBrowser() {
     await page.addScriptTag({ path: './build/sudoku/api/window.js' })
     const htmlContent = readFileSync('./window/window.html', 'utf-8')
 
-    await page.evaluate(([html, codes, redCodes]) => {
-        prInit(html, codes, redCodes)
-    }, [htmlContent, puzzleCodes, redPuzzleCodes] as const)
+    await page.evaluate(([html, passedPacket]) => {
+        prInit(html, passedPacket)
+    }, [htmlContent, packet] as const)
 }
 
 runBrowser()

@@ -1,3 +1,5 @@
+import { PuzzlePacket } from "../sudoku"
+
 type Puzzle = { __type__: "Puzzle" }
 type Settings = {
     hidetimer: boolean
@@ -7,6 +9,17 @@ type Settings = {
     autocheck: boolean
     checkpencilmarks: boolean
     conflictchecker: "on" | "off" | "simple"
+}
+type ReplayOpts = {
+    speed?: number
+}
+type Replay = {
+    puzzleId: string
+    type: "clzw"
+    rows: 9
+    cols: 9
+    version: string
+    data: string
 }
 type ScreenshotOptions = {
     blank: boolean
@@ -38,13 +51,19 @@ declare const Framework: {
         restartPuzzle: (keepTime?: boolean) => void
         loadCTCPuzzle: (ctcPuzzle: Puzzle) => Promise<boolean>
         loadCompactClassicSudoku: () => Promise<unknown>
+        loadReplay: (replay: string, opts: ReplayOpts) => Promise<void>
+        getReplay: () => string
     }
     getSetting: <T extends keyof Settings>(setting: T) => Settings[T]
     setSetting: <T extends keyof Settings>(setting: T, value: Settings[T]) => void
     closeDialog(): void
 }
+declare const loadFPuzzle: {
+    compressPuzzle: (input: string) => string
+    decompressPuzzle: (input: string) => string
+}
 
-async function prApiLoadPuzzle(code: string) {
+async function prApiLoadPuzzle(packet: PuzzlePacket, showRed: boolean) {
     //TODO: Maybe fix with loadProgress / replayPlay(..., { speed: -1 })
     // eg. load puzzle only when changed, otherwise only load progress (would also make marks better)
     // also, we would need another format for this: ShowFormat, which is an object in the format that the engine requires
@@ -107,4 +126,18 @@ async function prGetImageDataUrl(screenshot: boolean): Promise<string> {
     await Framework.features.screenshot.handleCloseDialog()
 
     return downloadString
+}
+
+async function prLoadSeq(sequence: string): Promise<void> {
+    const oldReplay: Replay = JSON.parse(Framework.app.getReplay())
+    const newReplay = {
+        ...oldReplay,
+        data: loadFPuzzle.compressPuzzle(sequence)
+    }
+    await Framework.app.loadReplay(JSON.stringify(newReplay), { speed: -1 })
+}
+
+function prExportSeq(): string {
+    const replay: Replay = JSON.parse(Framework.app.getReplay())
+    return loadFPuzzle.decompressPuzzle(replay.data)
 }

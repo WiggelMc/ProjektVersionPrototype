@@ -48,6 +48,7 @@ declare const Framework: {
                 row: number
                 col: number
             }[]
+            undoStack: string[]
         }
         restartPuzzle: (keepTime?: boolean) => void
         loadCTCPuzzle: (ctcPuzzle: Puzzle) => Promise<boolean>
@@ -66,10 +67,14 @@ declare const loadFPuzzle: {
 
 async function prApiLoadPuzzle(packet: Packet<string, SudokuPadStep>): Promise<void> {
     return PuzzleLoader.parsePuzzleData(packet.initial).then(async (puzzle) => {
+
         Framework.app.restartPuzzle()
         await Framework.app.loadCompactClassicSudoku()
+        await prLoadSeq("")
+
         Framework.app.restartPuzzle()
         await Framework.app.loadCTCPuzzle(puzzle)
+        await prLoadSeq("")
     })
 }
 
@@ -98,7 +103,7 @@ async function prApiLoadPuzzleStep(packet: Packet<string, SudokuPadStep>, step: 
     const beforeLoad = Date.now()
     await prLoadSeq(replay.join("_"))
     const afterLoad = Date.now()
-    
+
     await new Promise((resolve) => {
         window.setTimeout(resolve, afterLoad - beforeLoad)
     })

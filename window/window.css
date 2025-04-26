@@ -55,6 +55,10 @@
 .media-slider {
     width: 100%;
 }
+.media-slider:focus {
+    outline: none;
+    box-shadow: 0 0 0 black;
+}
 
 .media-button {
     width: 20em;

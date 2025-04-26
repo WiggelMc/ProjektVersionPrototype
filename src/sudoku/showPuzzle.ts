@@ -108,7 +108,7 @@ class FPuzzles implements Engine<string, FPuzzlesStep> {
     steps: FPuzzlesStep[]
 
     constructor(puzzle: FPuzzlesPuzzle) {
-        this.puzzle = new FPuzzlesPuzzle(JSON.parse(JSON.stringify(puzzle)))
+        this.puzzle = new FPuzzlesPuzzle(JSON.parse(JSON.stringify(puzzle.data)))
 
         const encoding = puzzle.toEncoding()
         this.steps = [{
@@ -134,7 +134,20 @@ class FPuzzles implements Engine<string, FPuzzlesStep> {
     }
 }
 
-const engine = new SudokuPad(puzzle)
+
+
+function loadEngine(engineParam: string) {
+    switch (engineParam) {
+        case "fpuzzles":
+            return new FPuzzles(puzzle)
+        case "sudokupad":
+            return new SudokuPad(puzzle)
+        default:
+            throw new Error(`Invalid Engine: ${engineParam}`)
+    }
+}
+
+const engine: Engine<unknown, unknown> = loadEngine(process.argv[2] ?? "fpuzzles")
 
 console.log("\nPuzzle\n\n")
 const url = engine.getUrl()

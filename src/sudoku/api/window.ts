@@ -155,7 +155,7 @@ export async function prInit(html: string, packet: Packet<Initial, Step>) {
     setSpeed(4)
     setShowRed(true)
 
-    document.addEventListener("keydown", (e) => {
+    window.addEventListener("keydown", (e) => {
         switch (e.key) {
             case "w":
                 if (!e.repeat) {
@@ -189,7 +189,15 @@ export async function prInit(html: string, packet: Packet<Initial, Step>) {
         }
         e.preventDefault()
         e.stopPropagation()
-    });
+        e.stopImmediatePropagation()
+    }, { capture: true });
+
+    ['pointerdown', 'mousedown', 'touchstart'].forEach(eventType => {
+        mediaSeekBar.addEventListener(eventType, (e) => {
+            e.stopPropagation()
+            e.stopImmediatePropagation()
+        })
+    })
 
     console.log("Puzzle Viewer Script Loaded")
 }

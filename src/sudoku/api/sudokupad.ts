@@ -134,17 +134,23 @@ function prApiInit() {
 }
 
 async function prGetImageDataUrl(screenshot: boolean): Promise<string> {
+    try {
+        document.body.classList.add("hide-dialogs")
 
-    await Framework.features.screenshot.handleOpenDialog()
-    Framework.features.screenshot.setOption("blank", !screenshot)
-    await Framework.features.screenshot.updateScreenshot()
+        await Framework.features.screenshot.handleOpenDialog()
 
-    const image = document.querySelector("#screenshot_preview") as HTMLImageElement
-    const downloadString = image.src
+        Framework.features.screenshot.setOption("blank", !screenshot)
+        await Framework.features.screenshot.updateScreenshot()
 
-    await Framework.features.screenshot.handleCloseDialog()
+        const image = document.querySelector("#screenshot_preview") as HTMLImageElement
+        const downloadString = image.src
 
-    return downloadString
+        await Framework.features.screenshot.handleCloseDialog()
+
+        return downloadString
+    } finally {
+        document.body.classList.remove("hide-dialogs")
+    }
 }
 
 async function prLoadSeq(sequence: string): Promise<void> {

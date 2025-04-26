@@ -164,7 +164,7 @@ for (let d = 1; d <= 9; d++) {
     }
 }
 
-declare function prInit(html: string, packet: Packet<any, any>): void
+declare function prInit(html: string, packet: Packet<any, any>): Promise<void>
 
 async function runBrowser() {
     const browser = await chromium.launch({ headless: false, args: ["--start-maximized"] })
@@ -180,8 +180,8 @@ async function runBrowser() {
         await page.addScriptTag({ path: './build/sudoku/api/window.js' })
         const htmlContent = readFileSync('./window/window.html', 'utf-8')
 
-        await page.evaluate(([html, packet]) => {
-            prInit(html, packet)
+        await page.evaluate(async ([html, packet]) => {
+            await prInit(html, packet)
         }, [htmlContent, engine.getPacket()] as const)
     })
     await page.goto(url)

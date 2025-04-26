@@ -12,6 +12,10 @@ export async function prInit(html: string, packet: Packet<Initial, Step>) {
     prApiInit()
 
     await prApiLoadPuzzle(packet)
+    // extract logic, so that prLoadPuzzle can be used from extern
+    // call init once
+    // for every other puzzle call load
+    // TODO: clean up logic
 
     let isRendering = false
     let renderStack: Step | null = null

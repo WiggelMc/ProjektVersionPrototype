@@ -8,6 +8,9 @@ type Settings = {
     checkpencilmarks: boolean
     conflictchecker: "on" | "off" | "simple"
 }
+type ScreenshotOptions = {
+    blank: boolean
+}
 
 declare const PuzzleLoader: {
     parsePuzzleData: (puzzleId: string) => Promise<Puzzle>
@@ -20,6 +23,14 @@ declare global {
 }
 
 declare const Framework: {
+    features: {
+        screenshot: {
+            handleOpenDialog: () => Promise<void>
+            handleCloseDialog: () => Promise<void>
+            updateScreenshot: () => Promise<void>
+            setOption: <T extends keyof ScreenshotOptions>(option: T, value: ScreenshotOptions[T]) => void
+        }
+    }
     app: {
         puzzle: {
             createPuzzle: (props: { row: number, col: number }) => void
@@ -42,7 +53,7 @@ async function prApiLoadPuzzle(code: string) {
 
         return PuzzleLoader.parsePuzzleData(window.firstPuzzle!).then(async (firstPuzzle) => {
             return new Promise(async (resolve) => {
-                
+
                 Framework.app.restartPuzzle()
                 const beforeLoad = Date.now()
                 await Framework.app.loadCTCPuzzle(firstPuzzle)
@@ -82,4 +93,18 @@ function prApiInit(puzzleCodes: string[], redPuzzleCodes: string[]) {
         childList: true,
         subtree: true
     })
+}
+
+async function prGetImageDataUrl(screenshot: boolean): Promise<string> {
+
+    await Framework.features.screenshot.handleOpenDialog()
+    Framework.features.screenshot.setOption("blank", !screenshot)
+    await Framework.features.screenshot.updateScreenshot()
+
+    const image = document.querySelector("#screenshot_preview") as HTMLImageElement
+    const downloadString = image.src
+
+    await Framework.features.screenshot.handleCloseDialog()
+
+    return downloadString
 }

@@ -1,4 +1,4 @@
-import { PuzzlePacket } from "../sudoku"
+import { Packet, SudokuPadStep } from "../sudoku"
 
 type Puzzle = { __type__: "Puzzle" }
 type Settings = {
@@ -29,12 +29,6 @@ declare const PuzzleLoader: {
     parsePuzzleData: (puzzleId: string) => Promise<Puzzle>
 }
 
-declare global {
-    interface Window {
-        firstPuzzle: string
-    }
-}
-
 declare const Framework: {
     features: {
         screenshot: {
@@ -47,6 +41,13 @@ declare const Framework: {
     app: {
         puzzle: {
             createPuzzle: (props: { row: number, col: number }) => void
+            grid: {
+                cols: number
+            }
+            selectedCells: {
+                row: number
+                col: number
+            }[]
         }
         restartPuzzle: (keepTime?: boolean) => void
         loadCTCPuzzle: (ctcPuzzle: Puzzle) => Promise<boolean>
@@ -63,35 +64,48 @@ declare const loadFPuzzle: {
     decompressPuzzle: (input: string) => string
 }
 
-async function prApiLoadPuzzle(packet: PuzzlePacket, showRed: boolean) {
-    //TODO: Maybe fix with loadProgress / replayPlay(..., { speed: -1 })
-    // eg. load puzzle only when changed, otherwise only load progress (would also make marks better)
-    // also, we would need another format for this: ShowFormat, which is an object in the format that the engine requires
-
-    return PuzzleLoader.parsePuzzleData(code).then((puzzle) => {
-
-        return PuzzleLoader.parsePuzzleData(window.firstPuzzle!).then(async (firstPuzzle) => {
-            return new Promise(async (resolve) => {
-
-                Framework.app.restartPuzzle()
-                const beforeLoad = Date.now()
-                await Framework.app.loadCTCPuzzle(firstPuzzle)
-                const betweenLoad = Date.now()
-                await Framework.app.loadCTCPuzzle(puzzle)
-                const afterLoad = Date.now()
-
-                const renderTime = betweenLoad - beforeLoad
-                const invisTime = afterLoad - betweenLoad
-                const sleepTime = Math.max(10, 2 * invisTime - renderTime)
-                window.setTimeout(resolve, sleepTime)
-            })
-        })
+async function prApiLoadPuzzle(packet: Packet<string, SudokuPadStep>): Promise<void> {
+    return PuzzleLoader.parsePuzzleData(packet.initial).then(async (puzzle) => {
+        Framework.app.restartPuzzle()
+        await Framework.app.loadCompactClassicSudoku()
+        Framework.app.restartPuzzle()
+        await Framework.app.loadCTCPuzzle(puzzle)
     })
 }
 
-function prApiInit(puzzleCodes: string[], redPuzzleCodes: string[]) {
-    window.firstPuzzle = puzzleCodes[0]!
+function prToCellCode(size: number, row: number, column: number): string {
+    const num = ((row - 1) * size + (column - 1))
+    return `0${num.toString(16)}`.slice(-2)
+}
 
+async function prApiLoadPuzzleStep(packet: Packet<string, SudokuPadStep>, step: SudokuPadStep, showRed: boolean): Promise<void> {
+
+    const size = Framework.app.puzzle.grid.cols
+    const selection = Framework.app.puzzle.selectedCells
+        .map((c) => prToCellCode(size, c.row + 1, c.col + 1))
+
+    const replay: string[] = []
+
+    replay.push(step.replay)
+    if (showRed) {
+        replay.push(step.red_replay)
+    }
+
+    if (selection.length > 0) {
+        replay.push(`I${selection.join("")}`)
+    }
+
+    const beforeLoad = Date.now()
+    await prLoadSeq(replay.join("_"))
+    const afterLoad = Date.now()
+    
+    await new Promise((resolve) => {
+        window.setTimeout(resolve, afterLoad - beforeLoad)
+    })
+}
+
+
+function prApiInit() {
     Framework.setSetting("hidetimer", true)
     Framework.setSetting("hidesvenpeek", true)
     Framework.setSetting("hidesventobyemoji", true)

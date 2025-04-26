@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
-import { grid, FPuzzlesPuzzle, SudokuPadPuzzle, FPuzzlesPuzzlePacket, SudokuPadPuzzlePacket, PuzzlePacket, SudokuPadPacket, Packet } from "./sudoku";
-import { chromium } from "playwright";
+import { grid, FPuzzlesPuzzle, SudokuPadPuzzle, FPuzzlesStep, SudokuPadStep, Packet } from "./sudoku";
+import { chromium, Page } from "playwright";
 
 const puzzle: FPuzzlesPuzzle = new FPuzzlesPuzzle({
     title: "Puzzle 1",
@@ -65,38 +65,80 @@ const puzzle: FPuzzlesPuzzle = new FPuzzlesPuzzle({
 })
 
 
-type Engine = "fpuzzles" | "sudokupad"
 
-const engine: Engine = "sudokupad"
 
-function toPacket(puzzle: FPuzzlesPuzzle, redPositions: ([row: number, column: number])[]) {
-    switch (engine) {
-        case "fpuzzles":
-            return puzzle.toPacket(redPositions)
-        case "sudokupad":
-            return SudokuPadPuzzle.fromFPuzzles(puzzle).toPacket(redPositions)
+interface Engine<Initial, Step> {
+    pushStep(puzzle: FPuzzlesPuzzle, redPositions: ([row: number, column: number])[]): void
+    getUrl(): string
+    getPacket(): Packet<Initial, Step>
+    injectCode(page: Page): Promise<void>
+}
+
+class SudokuPad implements Engine<string, SudokuPadStep> {
+    puzzle: SudokuPadPuzzle
+    steps: SudokuPadStep[]
+
+    constructor(puzzle: FPuzzlesPuzzle) {
+        this.puzzle = SudokuPadPuzzle.fromFPuzzles(puzzle)
+        this.steps = [{
+            replay: "",
+            red_replay: ""
+        }]
+    }
+    async injectCode(page: Page): Promise<void> {
+        await page.addStyleTag({ path: './window/sudokupad.css' })
+        await page.addScriptTag({ path: './build/sudoku/api/sudokupad.js' })
+    }
+    pushStep(puzzle: FPuzzlesPuzzle, redPositions: ([row: number, column: number])[]): void {
+        this.steps.push(SudokuPadPuzzle.fromFPuzzles(puzzle).toStep(redPositions))
+    }
+    getUrl(): string {
+        return this.puzzle.toUrl()
+    }
+    getPacket(): Packet<string, SudokuPadStep> {
+        return {
+            initial: this.puzzle.toEncoding(),
+            steps: this.steps
+        }
     }
 }
 
-function toUrl(puzzle: FPuzzlesPuzzle): string {
-    switch (engine) {
-        case "fpuzzles":
-            return puzzle.toUrl()
-        case "sudokupad":
-            return SudokuPadPuzzle.fromFPuzzles(puzzle).toUrl()
+class FPuzzles implements Engine<string, FPuzzlesStep> {
+    puzzle: FPuzzlesPuzzle
+    steps: FPuzzlesStep[]
+
+    constructor(puzzle: FPuzzlesPuzzle) {
+        this.puzzle = new FPuzzlesPuzzle(JSON.parse(JSON.stringify(puzzle)))
+
+        const encoding = puzzle.toEncoding()
+        this.steps = [{
+            puzzle: encoding,
+            red_puzzle: encoding
+        }]
+    }
+    async injectCode(page: Page): Promise<void> {
+        await page.addStyleTag({ path: './window/fpuzzles.css' })
+        await page.addScriptTag({ path: './build/sudoku/api/fpuzzles.js' })
+    }
+    pushStep(puzzle: FPuzzlesPuzzle, redPositions: ([row: number, column: number])[]): void {
+        this.steps.push(puzzle.toStep(redPositions))
+    }
+    getUrl(): string {
+        return this.puzzle.toUrl()
+    }
+    getPacket(): Packet<string, FPuzzlesStep> {
+        return {
+            initial: this.puzzle.toEncoding(),
+            steps: this.steps
+        }
     }
 }
+
+const engine = new SudokuPad(puzzle)
 
 console.log("\nPuzzle\n\n")
-const url = toUrl(puzzle)
+const url = engine.getUrl()
 console.log(url)
-
-const sudokuPadPacket = {
-    puzzle: SudokuPadPuzzle.fromFPuzzles(puzzle).toEncoding()
-} as const satisfies Partial<SudokuPadPacket> 
-const puzzlePackets: PuzzlePacket[] = []
-
-puzzlePackets.push(toPacket(puzzle, []))
 
 for (let d = 1; d <= 9; d++) {
     for (let r = 0; r < 9; r++) {
@@ -104,14 +146,12 @@ for (let d = 1; d <= 9; d++) {
             const value = (c + 3 * r + Math.floor(r / 3) + d - 1) % 9 + 1
             puzzle.data.grid[r]![c]!.value = value
 
-            puzzlePackets.push(toPacket(puzzle, [[r + 1, c + 1]]))
+            engine.pushStep(puzzle, [[r + 1, c + 1]])
         }
     }
 }
 
-console.log(puzzlePackets[20])
-
-declare function prInit(html: string, packets: Packet): void
+declare function prInit(html: string, packet: Packet<any, any>): void
 
 async function runBrowser() {
     const browser = await chromium.launch({ headless: false, args: ["--start-maximized"] })
@@ -120,36 +160,18 @@ async function runBrowser() {
     page.on('close', () => {
         process.exit(0);
     })
+    page.on('load', async () => {
+        await engine.injectCode(page)
+
+        await page.addStyleTag({ path: './window/window.css' })
+        await page.addScriptTag({ path: './build/sudoku/api/window.js' })
+        const htmlContent = readFileSync('./window/window.html', 'utf-8')
+
+        await page.evaluate(([html, packet]) => {
+            prInit(html, packet)
+        }, [htmlContent, engine.getPacket()] as const)
+    })
     await page.goto(url)
-
-    
-    let packet: Packet
-
-    switch (engine) {
-        case "fpuzzles":
-            await page.addStyleTag({ path: './window/fpuzzles.css' })
-            await page.addScriptTag({ path: './build/sudoku/api/fpuzzles.js' })
-            packet = {
-                puzzles: puzzlePackets as FPuzzlesPuzzlePacket[]
-            }
-            break
-        case "sudokupad":
-            await page.addStyleTag({ path: './window/sudokupad.css' })
-            await page.addScriptTag({ path: './build/sudoku/api/sudokupad.js' })
-            packet = {
-                ...sudokuPadPacket,
-                replays: puzzlePackets as SudokuPadPuzzlePacket[]
-            }
-            break
-    }
-
-    await page.addStyleTag({ path: './window/window.css' })
-    await page.addScriptTag({ path: './build/sudoku/api/window.js' })
-    const htmlContent = readFileSync('./window/window.html', 'utf-8')
-
-    await page.evaluate(([html, passedPacket]) => {
-        prInit(html, passedPacket)
-    }, [htmlContent, packet] as const)
 }
 
 runBrowser()

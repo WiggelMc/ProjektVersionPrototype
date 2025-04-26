@@ -152,13 +152,9 @@ export interface FPuzzlesData {
     }[]
 }
 
-export type FPuzzlesPuzzlePacket = {
+export type FPuzzlesStep = {
     puzzle: string
     red_puzzle: string
-}
-
-export type FPuzzlesPacket = {
-    puzzles: FPuzzlesPuzzlePacket[]
 }
 
 export class FPuzzlesPuzzle {
@@ -181,7 +177,7 @@ export class FPuzzlesPuzzle {
         return `https://www.f-puzzles.com/?load=${encoding}`
     }
 
-    toPacket(redPositions: ([row: number, column: number])[]): FPuzzlesPuzzlePacket {
+    toStep(redPositions: ([row: number, column: number])[]): FPuzzlesStep {
         const red_puzzle = new FPuzzlesPuzzle(JSON.parse(JSON.stringify(this.data)))
         for (const [row, column] of redPositions) {
             const cell = red_puzzle.data.grid[row - 1]?.[column - 1]
@@ -199,12 +195,13 @@ export class FPuzzlesPuzzle {
 class ReplayBuilder {
     size: number
 
-    constructor(width: number) {
-        this.size = width
+    constructor(size: number) {
+        this.size = size
     }
 
     cellCode(row: number, column: number): string {
-        return ((row - 1) * this.size + (column - 1)).toString(16)
+        const num = ((row - 1) * this.size + (column - 1))
+        return `0${num.toString(16)}`.slice(-2)
     }
 
     static colorCode(color: CellColor): number {
@@ -241,14 +238,9 @@ class ReplayBuilder {
     }
 }
 
-export type SudokuPadPuzzlePacket = {
+export type SudokuPadStep = {
     replay: string
     red_replay: string
-}
-
-export type SudokuPadPacket = {
-    puzzle: string
-    replays: SudokuPadPuzzlePacket[]
 }
 
 export class SudokuPadPuzzle {
@@ -317,7 +309,7 @@ export class SudokuPadPuzzle {
         return `https://sudokupad.app/scf?puzzleid=${encoding}`
     }
 
-    toPacket(redPositions: ([row: number, column: number])[]): SudokuPadPuzzlePacket {
+    toStep(redPositions: ([row: number, column: number])[]): SudokuPadStep {
         const red_replay: string[] = []
         const builder: ReplayBuilder = new ReplayBuilder(this.data.size)
         for (const [row, column] of redPositions) {
@@ -332,10 +324,9 @@ export class SudokuPadPuzzle {
     }
 }
 
-export type PuzzlePacket = FPuzzlesPuzzlePacket | SudokuPadPuzzlePacket
-export type Packet<I, S> = {
-    initial: I
-    steps: S
+export type Packet<Initial, Step> = {
+    initial: Initial
+    steps: Step[]
 }
 
 export function grid(size: number, cells: { [k: string]: GridCell }): GridCell[][] {

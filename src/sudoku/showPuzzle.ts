@@ -7,7 +7,7 @@ const puzzle: FPuzzlesPuzzle = new FPuzzlesPuzzle({
     author: "Kim",
     ruleset: "Normal Sudoku Rules apply.",
     size: 9,
-    highlightConflicts: true,
+    highlightConflicts: false,
     grid: grid(9, {
         "R3C1": {
             cornerPencilMarks: [1, 2, 4, 5],

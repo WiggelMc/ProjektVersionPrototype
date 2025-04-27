@@ -21,7 +21,7 @@
     top: 0;
 }
 
-.pr-bar > div {
+.pr-bar>div {
     background: rgb(208, 208, 208);
     box-shadow: inset 0 0 0 5px rgb(128, 128, 128);
     margin: 20px;
@@ -43,7 +43,7 @@
     justify-content: space-evenly;
 }
 
-#media-control > div {
+#media-control>div {
     width: 100%;
     display: flex;
 
@@ -55,14 +55,16 @@
 .media-slider {
     width: 100%;
 }
+
 .media-slider:focus {
     outline: none;
     box-shadow: 0 0 0 black;
 }
 
 .media-button {
-    width: 20em;
+    width: 10em;
     height: 3em;
+    font-size: 1rem;
 }
 
 .media-text {
@@ -73,4 +75,13 @@
 .media-select {
     width: 10em;
     height: 3em;
+}
+
+.media-button {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }

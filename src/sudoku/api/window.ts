@@ -6,6 +6,7 @@ type Step = { __type__: "step" }
 interface ControlElements {
     seekBar: HTMLInputElement
     progressDisplay: HTMLParagraphElement
+    rewindButton: HTMLButtonElement
     playButton: HTMLButtonElement
     backButton: HTMLButtonElement
     forwardButton: HTMLButtonElement
@@ -14,12 +15,14 @@ interface ControlElements {
     speedSelect: HTMLSelectElement
 }
 
+type Playing = "playing" | "paused" | "rewinding"
+
 class WindowManager {
     readonly pageApi: PageApi<Initial, Step>
 
     maxProgress: number
     progress: number
-    isPlaying: boolean
+    playState: Playing
     speed: number
     displayOptions: DisplayOptions
     packet?: Packet<Initial, Step>
@@ -32,7 +35,7 @@ class WindowManager {
 
         this.maxProgress = 0
         this.progress = 0
-        this.isPlaying = false
+        this.playState = "paused"
         this.speed = 4
         this.displayOptions = {
             showRed: true
@@ -43,6 +46,7 @@ class WindowManager {
         this.controls = {
             seekBar: document.getElementById("media-seek-bar") as HTMLInputElement,
             progressDisplay: document.getElementById("media-progress") as HTMLParagraphElement,
+            rewindButton: document.getElementById("media-rewind") as HTMLButtonElement,
             playButton: document.getElementById("media-play") as HTMLButtonElement,
             backButton: document.getElementById("media-back") as HTMLButtonElement,
             forwardButton: document.getElementById("media-forward") as HTMLButtonElement,
@@ -67,6 +71,9 @@ class WindowManager {
 
         controls.seekBar.addEventListener("input", (e) => {
             this.setProgress(Number.parseInt(controls.seekBar.value))
+        })
+        controls.rewindButton.addEventListener("click", (e) => {
+            this.toggleRewind()
         })
         controls.playButton.addEventListener("click", (e) => {
             this.togglePlay()
@@ -100,6 +107,11 @@ class WindowManager {
                 case "w":
                     if (!e.repeat) {
                         this.togglePlay()
+                    }
+                    break
+                case "s":
+                    if (!e.repeat) {
+                        this.toggleRewind()
                     }
                     break
                 case "a":
@@ -159,15 +171,27 @@ class WindowManager {
         this.renderButtons()
     }
     togglePlay() {
-        if (!this.isPlaying && this.progress === this.maxProgress) {
+        if (this.playState === "paused" && this.progress === this.maxProgress) {
             this.setProgress(0)
-            this.setPlaying(true)
+            this.setPlayState("playing")
+        } else if (this.playState === "playing") {
+            this.setPlayState("paused")
         } else {
-            this.setPlaying(!this.isPlaying)
+            this.setPlayState("playing")
         }
     }
-    setPlaying(isPlaying: boolean) {
-        this.isPlaying = isPlaying
+    toggleRewind() {
+        if (this.playState === "paused" && this.progress === 0) {
+            this.setProgress(this.maxProgress)
+            this.setPlayState("rewinding")
+        } else if (this.playState === "rewinding") {
+            this.setPlayState("paused")
+        } else {
+            this.setPlayState("rewinding")
+        }
+    }
+    setPlayState(playState: Playing) {
+        this.playState = playState
         this.updatePlayInterval()
         this.renderButtons()
     }
@@ -182,13 +206,20 @@ class WindowManager {
             window.clearInterval(this.playingIntervalID)
             this.playingIntervalID = null
         }
-        if (this.isPlaying) {
+        if (this.playState !== "paused") {
             this.playingIntervalID = window.setInterval(() => {
-
-                if (this.progress === this.maxProgress) {
-                    this.setPlaying(false)
+                if (this.playState === "playing") {
+                    if (this.progress === this.maxProgress) {
+                        this.setPlayState("paused")
+                    } else {
+                        this.setProgress(this.progress + 1)
+                    }
                 } else {
-                    this.setProgress(this.progress + 1)
+                    if (this.progress === 0) {
+                        this.setPlayState("paused")
+                    } else {
+                        this.setProgress(this.progress - 1)
+                    }
                 }
 
             }, 1000 / this.speed)
@@ -254,7 +285,12 @@ class WindowManager {
             return
         }
 
-        const playText = `${this.isPlaying ? "Pause" : "Play"} [W]`
+        const rewindText = `${this.playState === "rewinding" ? "Pause" : "Rewind"} [S]`
+        if (controls.rewindButton.textContent !== rewindText) {
+            controls.rewindButton.textContent = rewindText
+        }
+
+        const playText = `${this.playState === "playing" ? "Pause" : "Play"} [W]`
         if (controls.playButton.textContent !== playText) {
             controls.playButton.textContent = playText
         }
@@ -281,7 +317,7 @@ class WindowManager {
         this.packet = packet
         this.progress = 0
         this.maxProgress = Math.max(0, (packet?.steps.length ?? 0) - 1)
-        this.isPlaying = false
+        this.playState = "paused"
 
         this.renderAll()
     }

@@ -14,3 +14,45 @@
 body.hide-dialogs .dialog-overlay {
     display: none !important;
 }
+
+.pr-bar>div {
+    background: white;
+    box-shadow: inset 0 0 0 5px rgb(204, 204, 204);
+    border-radius: 1.2vw;
+}
+
+#pr-side-bar {
+    margin-top: 65px;
+    height: calc(80vh - 65px) !important;
+}
+
+.media-button {
+    text-box-trim: trim-both;
+}
+
+.media-select {
+    cursor: pointer;
+    white-space: nowrap;
+    border: 1px solid #ccc;
+    border-radius: 0.5rem;
+    line-height: 3rem;
+    margin: 0.15rem;
+    padding: 0 0.25rem;
+    align-items: center;
+    background: var(--bg-color);
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+.media-select,
+.media-text {
+    font-family: Roboto, Arial, sans-serif;
+    color: var(--main-color);
+    font-weight: 500;
+}
+
+.pr-bar p {
+    font-family: Roboto, Arial, sans-serif;
+    color: var(--main-color);
+    font-weight: 500;
+}

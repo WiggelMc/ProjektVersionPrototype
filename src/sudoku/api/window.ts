@@ -1,227 +1,314 @@
-import { Packet, PageApi, PRWindow, WindowApi } from "./api"
+import { DisplayOptions, Packet, PageApi, PRWindow, WindowApi } from "./api"
 
 type Initial = { __type__: "initial" }
 type Step = { __type__: "step" }
 
+interface ControlElements {
+    seekBar: HTMLInputElement
+    progressDisplay: HTMLParagraphElement
+    playButton: HTMLButtonElement
+    backButton: HTMLButtonElement
+    forwardButton: HTMLButtonElement
+    showRedButton: HTMLButtonElement
+    refreshButton: HTMLButtonElement
+    speedSelect: HTMLSelectElement
+}
+
 class WindowManager {
-    steps: 
-}
+    readonly pageApi: PageApi<Initial, Step>
 
-class MainWindowApi implements WindowApi<Initial, Step> {
-    pageApi: PageApi<Initial, Step>
-    windowManager: WindowManager
+    maxProgress: number
+    progress: number
+    isPlaying: boolean
+    speed: number
+    displayOptions: DisplayOptions
+    packet?: Packet<Initial, Step>
+    controls?: ControlElements
 
-    constructor() {
-        const prWindow = window as PRWindow<Initial, Step>
-        this.pageApi = prWindow.PRPageAPI
-        this.windowManager = new WindowManager()
+    playingIntervalID: number | null = null
+
+    constructor(pageApi: PageApi<Initial, Step>) {
+        this.pageApi = pageApi
+
+        this.maxProgress = 0
+        this.progress = 0
+        this.isPlaying = false
+        this.speed = 4
+        this.displayOptions = {
+            showRed: true
+        }
     }
 
-    async init(): Promise<void> {
-
+    loadControls() {
+        this.controls = {
+            seekBar: document.getElementById("media-seek-bar") as HTMLInputElement,
+            progressDisplay: document.getElementById("media-progress") as HTMLParagraphElement,
+            playButton: document.getElementById("media-play") as HTMLButtonElement,
+            backButton: document.getElementById("media-back") as HTMLButtonElement,
+            forwardButton: document.getElementById("media-forward") as HTMLButtonElement,
+            showRedButton: document.getElementById("media-show-red") as HTMLButtonElement,
+            refreshButton: document.getElementById("media-refresh") as HTMLButtonElement,
+            speedSelect: document.getElementById("media-speed") as HTMLSelectElement,
+        }
     }
-    async loadPuzzle(packet: Packet<Initial, Step>): Promise<void> {
 
+    init() {
+        this.loadControls()
+        this.initControls()
+        this.initKeybinds()
+        this.renderAll()
     }
-}
 
-prWindow.PRWindowApi = new MainWindowApi()
+    initControls() {
+        const controls = this.controls
+        if (controls === undefined) {
+            return
+        }
 
-export async function prInit(html: string, packet: Packet<Initial, Step>) {
-    document.body.insertAdjacentHTML("beforeend", html)
-    prApiInit()
+        controls.seekBar.addEventListener("input", (e) => {
+            this.setProgress(Number.parseInt(controls.seekBar.value))
+        })
+        controls.playButton.addEventListener("click", (e) => {
+            this.togglePlay()
+        })
+        controls.backButton.addEventListener("click", (e) => {
+            this.setProgress(this.progress - 1)
+        })
+        controls.forwardButton.addEventListener("click", (e) => {
+            this.setProgress(this.progress + 1)
+        })
+        controls.showRedButton.addEventListener("click", (e) => {
+            this.setShowRed(!this.displayOptions.showRed)
+        })
+        controls.refreshButton.addEventListener("click", (e) => {
+            this.renderPuzzleStep()
+        })
+        controls.speedSelect.addEventListener("change", (e) => {
+            this.setSpeed(Number.parseFloat(controls.speedSelect.value))
+        })
 
-    await prApiLoadPuzzle(packet)
-    // extract logic, so that prLoadPuzzle can be used from extern
-    // call init once
-    // for every other puzzle call load
-    // TODO: clean up logic
+        for (const eventType of ['pointerdown', 'mousedown', 'touchstart']) {
+            controls.seekBar.addEventListener(eventType, (e) => {
+                e.stopPropagation()
+                e.stopImmediatePropagation()
+            })
+        }
+    }
+    initKeybinds() {
+        window.addEventListener("keydown", (e) => {
+            switch (e.key) {
+                case "w":
+                    if (!e.repeat) {
+                        this.togglePlay()
+                    }
+                    break
+                case "a":
+                    this.setProgress(this.progress - 1)
+                    break
+                case "d":
+                    this.setProgress(this.progress + 1)
+                    break
+                case "r":
+                    if (!e.repeat) {
+                        this.setShowRed(!this.displayOptions.showRed)
+                    }
+                    break
+                case "q":
+                    if (!e.repeat) {
+                        this.renderPuzzleStep()
+                    }
+                    break
+                case "n":
+                    this.changeSpeedIndex(-1)
+                    break
+                case "m":
+                    this.changeSpeedIndex(1)
+                    break
+                default:
+                    return
+            }
+            e.preventDefault()
+            e.stopPropagation()
+            e.stopImmediatePropagation()
+        }, { capture: true });
+    }
+    changeSpeedIndex(offset: number) {
+        const controls = this.controls
+        if (controls === undefined) {
+            return
+        }
 
-    let isRendering = false
-    let renderStack: Step | null = null
+        const values = [...controls.speedSelect.options].map(o => Number.parseFloat(o.value))
+        const oldIndex = values.findIndex((v) => this.speed == v)
+        const newIndex = oldIndex + offset
 
-    const mediaSeekBar = document.getElementById("media-seek-bar") as HTMLInputElement
-    const mediaRefresh = document.getElementById("media-refresh") as HTMLButtonElement
-    const mediaPlay = document.getElementById("media-play") as HTMLButtonElement
-    const mediaProgress = document.getElementById("media-progress") as HTMLParagraphElement
-    const mediaBack = document.getElementById("media-back") as HTMLButtonElement
-    const mediaForward = document.getElementById("media-forward") as HTMLButtonElement
-    const mediaSpeed = document.getElementById("media-speed") as HTMLSelectElement
-    const mediaShowRed = document.getElementById("media-show-red") as HTMLButtonElement
+        const clampedIndex = Math.max(0, Math.min(newIndex, values.length - 1))
+        const newSpeed = values[clampedIndex]
+        if (newSpeed !== undefined) {
+            this.setSpeed(newSpeed)
+        }
+    }
+    setSpeed(speed: number) {
+        this.speed = speed
+        this.updatePlayInterval()
+        this.renderSpeedSelect()
+    }
+    setShowRed(showRed: boolean) {
+        this.displayOptions.showRed = showRed
+        this.renderPuzzleStep()
+        this.renderButtons()
+    }
+    togglePlay() {
+        if (!this.isPlaying && this.progress === this.maxProgress) {
+            this.setProgress(0)
+            this.setPlaying(true)
+        } else {
+            this.setPlaying(!this.isPlaying)
+        }
+    }
+    setPlaying(isPlaying: boolean) {
+        this.isPlaying = isPlaying
+        this.updatePlayInterval()
+        this.renderButtons()
+    }
+    setProgress(progress: number) {
+        const clampedProgress = Math.max(0, Math.min(progress, this.maxProgress))
+        this.progress = clampedProgress
+        this.renderPuzzleStep()
+        this.renderProgress()
+    }
+    updatePlayInterval() {
+        if (this.playingIntervalID !== null) {
+            window.clearInterval(this.playingIntervalID)
+            this.playingIntervalID = null
+        }
+        if (this.isPlaying) {
+            this.playingIntervalID = window.setInterval(() => {
 
-
-    const render = async (step: Step) => {
-        renderStack = step
-        renderStack = step
-
-        if (!isRendering) {
-            isRendering = true
-
-            while (renderStack !== null) {
-                while (renderStack !== null) {
-                    isRendering = true
-
-                    const nextStep = renderStack
-                    renderStack = null
-
-                    await prApiLoadPuzzleStep(packet, nextStep, showRed)
+                if (this.progress === this.maxProgress) {
+                    this.setPlaying(false)
+                } else {
+                    this.setProgress(this.progress + 1)
                 }
-                isRendering = false
+
+            }, 1000 / this.speed)
+        }
+    }
+
+    renderAll() {
+        this.renderPuzzle()
+        this.renderPuzzleStep()
+
+        this.renderProgress()
+        this.renderButtons()
+        this.renderSpeedSelect()
+    }
+
+    renderPuzzle() {
+        if (this.packet !== undefined) {
+            this.pageApi.loadPuzzle(this.packet, this.displayOptions)
+        }
+    }
+
+    renderPuzzleStep() {
+        if (this.packet === undefined) {
+            this.pageApi.clearPuzzle(this.displayOptions)
+        } else if (this.packet.steps.length == 0) {
+            this.pageApi.loadPuzzle(this.packet, this.displayOptions)
+        } else {
+            const step = this.packet.steps[this.progress]
+            if (step !== undefined) {
+                this.pageApi.loadPuzzleStep(this.packet, step, this.displayOptions)
             }
         }
     }
 
-    let progress = 0
-    const setProgress = async (newProgress: number, newRed: boolean) => {
-        if (newProgress >= packet.steps.length) {
-            setPlaying(false)
-            newProgress = packet.steps.length - 1
-        }
-        if (newProgress < 0) {
-            newProgress = 0
+    renderProgress() {
+        const controls = this.controls
+        if (controls === undefined) {
+            return
         }
 
-        progress = newProgress
-        const puzzlePacket = packet.steps[newProgress]
-        if (puzzlePacket !== undefined) {
-            render(puzzlePacket)
+        const progressDisplayText = `${this.progress} / ${this.maxProgress}`
+        if (controls.progressDisplay.textContent !== progressDisplayText) {
+            controls.progressDisplay.textContent = progressDisplayText
         }
-        const str = newProgress.toString()
-        if (str !== mediaSeekBar.value) {
-            mediaSeekBar.value = str
-        }
-        mediaProgress.innerText = `${newProgress} / ${packet.steps.length - 1}`
-    }
-    mediaSeekBar.min = progress.toString()
-    mediaSeekBar.max = (packet.steps.length - 1).toString()
-    mediaSeekBar.value = progress.toString()
-    mediaSeekBar.addEventListener("input", (e) => {
-        setProgress(Number.parseInt(mediaSeekBar.value), showRed)
-    })
-    mediaBack.addEventListener("click", (e) => {
-        setProgress(progress - 1, showRed)
-    })
-    mediaForward.addEventListener("click", (e) => {
-        setProgress(progress + 1, showRed)
-    })
-    mediaRefresh.addEventListener("click", (e) => {
-        setProgress(progress, showRed)
-    })
 
-    const nextFrame = () => {
-        setProgress(progress + 1, showRed)
-    }
-
-    let intervalID: number | null = null
-    const setInterval = (isPlaying: boolean, newSpeed: number) => {
-        if (intervalID !== null) {
-            window.clearInterval(intervalID)
-            intervalID = null
+        const min = "0"
+        if (controls.seekBar.min !== min) {
+            controls.seekBar.min = min
         }
-        if (isPlaying) {
-            intervalID = window.setInterval(nextFrame, 1000 / newSpeed)
+        const max = this.maxProgress.toString()
+        if (controls.seekBar.max !== max) {
+            controls.seekBar.max = max
+        }
+        const value = this.progress.toString()
+        if (controls.seekBar.value !== value) {
+            controls.seekBar.value = value
         }
     }
 
-    let playing = false
-    const setPlaying = (isPlaying: boolean) => {
-        if (isPlaying && progress >= packet.steps.length - 1) {
-            setProgress(0, showRed)
+    renderButtons() {
+        const controls = this.controls
+        if (controls === undefined) {
+            return
         }
-        playing = isPlaying
-        mediaPlay.innerText = (isPlaying ? "Pause" : "Play") + " [W]"
-        setInterval(isPlaying, speed)
-    }
-    mediaPlay.addEventListener("click", (e) => {
-        setPlaying(!playing)
-    })
 
-
-    let speed = 4
-    const setSpeed = (newSpeed: number) => {
-        speed = newSpeed
-        const str = newSpeed.toString()
-        if (str !== mediaSpeed.value) {
-            mediaSpeed.value = str
+        const playText = `${this.isPlaying ? "Pause" : "Play"} [W]`
+        if (controls.playButton.textContent !== playText) {
+            controls.playButton.textContent = playText
         }
-        setInterval(playing, newSpeed)
-    }
-    const changeSpeedIndex = (offset: number) => {
-        const values = [...mediaSpeed.options].map(o => Number.parseFloat(o.value))
-        const oldIndex = values.findIndex((v) => speed == v)
-        const newIndex = oldIndex + offset
-        if (newIndex < 0) {
-            setSpeed(values[0]!)
-        } else if (newIndex >= values.length) {
-            setSpeed(values[values.length - 1]!)
-        } else {
-            setSpeed(values[newIndex]!)
+
+        const showRedText = `${this.displayOptions.showRed ? "Disable Red" : "Enable Red"} [R]`
+        if (controls.showRedButton.textContent !== showRedText) {
+            controls.showRedButton.textContent = showRedText
         }
     }
-    mediaSpeed.addEventListener("change", (e) => {
-        setSpeed(Number.parseFloat(mediaSpeed.value))
-    })
 
-
-    let showRed = true
-    const setShowRed = (newRed: boolean) => {
-        showRed = newRed
-        setProgress(progress, newRed)
-        mediaShowRed.innerText = (newRed ? "Disable Red" : "Enable Red") + " [R]"
-    }
-    mediaShowRed.addEventListener("click", (e) => {
-        setShowRed(!showRed)
-    })
-
-
-    setProgress(0, showRed)
-    setPlaying(false)
-    setSpeed(4)
-    setShowRed(true)
-
-    window.addEventListener("keydown", (e) => {
-        switch (e.key) {
-            case "w":
-                if (!e.repeat) {
-                    setPlaying(!playing)
-                }
-                break
-            case "a":
-                setProgress(progress - 1, showRed)
-                break
-            case "d":
-                setProgress(progress + 1, showRed)
-                break
-            case "r":
-                if (!e.repeat) {
-                    setShowRed(!showRed)
-                }
-                break
-            case "q":
-                if (!e.repeat) {
-                    setProgress(progress, showRed)
-                }
-                break
-            case "n":
-                changeSpeedIndex(-1)
-                break
-            case "m":
-                changeSpeedIndex(1)
-                break
-            default:
-                return
+    renderSpeedSelect() {
+        const controls = this.controls
+        if (controls === undefined) {
+            return
         }
-        e.preventDefault()
-        e.stopPropagation()
-        e.stopImmediatePropagation()
-    }, { capture: true });
 
-    ['pointerdown', 'mousedown', 'touchstart'].forEach(eventType => {
-        mediaSeekBar.addEventListener(eventType, (e) => {
-            e.stopPropagation()
-            e.stopImmediatePropagation()
-        })
-    })
+        const value = this.speed.toString()
+        if (controls.speedSelect.value !== value) {
+            controls.speedSelect.value = value
+        }
+    }
 
-    console.log("Puzzle Viewer Script Loaded")
+    loadPuzzle(packet?: Packet<Initial, Step>) {
+        this.packet = packet
+        this.progress = 0
+        this.maxProgress = Math.max(0, (packet?.steps.length ?? 0) - 1)
+        this.isPlaying = false
+
+        this.renderAll()
+    }
 }
+
+class MainWindowApi implements WindowApi<Initial, Step> {
+    readonly pageApi: PageApi<Initial, Step>
+    readonly windowManager: WindowManager
+    packet?: Packet<Initial, Step>
+
+    constructor() {
+        const prWindow = window as PRWindow<Initial, Step>
+        this.pageApi = prWindow.PRPageAPI
+        this.windowManager = new WindowManager(this.pageApi)
+    }
+
+    async init(html: string): Promise<void> {
+        document.body.insertAdjacentHTML("beforeend", html)
+        this.pageApi.init()
+        this.windowManager.init()
+
+        console.log("Puzzle Viewer Script Loaded")
+    }
+    async loadPuzzle(packet?: Packet<Initial, Step>): Promise<void> {
+        this.packet = packet
+        this.windowManager.loadPuzzle(packet)
+    }
+}
+
+window.PRWindowApi = new MainWindowApi()

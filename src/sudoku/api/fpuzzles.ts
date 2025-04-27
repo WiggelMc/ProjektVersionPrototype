@@ -10,8 +10,17 @@ declare const puzzleTimer: {
 }
 
 class FPuzzlesApi implements PageApi<string, FPuzzlesStep> {
+    readonly emptyPuzzle: string
+
+    constructor() {
+        this.emptyPuzzle = "N4IgzglgXgpiBcBOANCA5gJwgEwQbT2AF9ljSSzKLryBdZQmq8l54+x1p7rjtn/nQaCR3PgIm9hk0UM6zR4rssW0iQA="
+    }
+
     async init(): Promise<void> {
         puzzleTimer.shown = false
+    }
+    async clearPuzzle(opts: DisplayOptions): Promise<void> {
+        importPuzzle(this.emptyPuzzle, true)
     }
     async loadPuzzle(packet: Packet<string, FPuzzlesStep>, opts: DisplayOptions): Promise<void> {
         importPuzzle(packet.initial, true)

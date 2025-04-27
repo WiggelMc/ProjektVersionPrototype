@@ -90,7 +90,7 @@ class SudokuPad implements Engine<string, SudokuPadStep> {
     }
     async injectCode(page: Page): Promise<void> {
         await page.addStyleTag({ path: './window/sudokupad.css' })
-        await page.addScriptTag({ path: './build/sudoku/api/sudokupad.js' })
+        await page.addScriptTag({ path: './api_build/sudoku/api/sudokupad.js', type: 'module' })
     }
     pushStep(puzzle: FPuzzlesPuzzle, redPositions: ([row: number, column: number])[]): void {
         this.steps.push(SudokuPadPuzzle.fromFPuzzles(puzzle).toStep(redPositions))
@@ -121,7 +121,7 @@ class FPuzzles implements Engine<string, FPuzzlesStep> {
     }
     async injectCode(page: Page): Promise<void> {
         await page.addStyleTag({ path: './window/fpuzzles.css' })
-        await page.addScriptTag({ path: './build/sudoku/api/fpuzzles.js' })
+        await page.addScriptTag({ path: './api_build/sudoku/api/fpuzzles.js', type: 'module' })
     }
     pushStep(puzzle: FPuzzlesPuzzle, redPositions: ([row: number, column: number])[]): void {
         this.steps.push(puzzle.toStep(redPositions))
@@ -167,8 +167,6 @@ for (let d = 1; d <= 9; d++) {
     }
 }
 
-declare function prInit(html: string, packet: Packet<any, any>): Promise<void>
-
 async function runBrowser() {
     const browser = await chromium.launch({ headless: false, args: ["--start-maximized"] })
     const context = await browser.newContext({ viewport: null })
@@ -180,12 +178,17 @@ async function runBrowser() {
         await engine.injectCode(page)
 
         await page.addStyleTag({ path: './window/window.css' })
-        await page.addScriptTag({ path: './build/sudoku/api/window.js' })
+        await page.addScriptTag({ path: './api_build/sudoku/api/window.js', type: 'module' })
         const htmlContent = readFileSync('./window/window.html', 'utf-8')
 
-        await page.evaluate(async ([html, packet]) => {
-            await prInit(html, packet)
-        }, [htmlContent, engine.getPacket()] as const)
+        try {
+            await page.evaluate(([html, packet]) => {
+                return window.PRWindowApi.init(html)
+                    .then(() => window.PRWindowApi.loadPuzzle(packet))
+            }, [htmlContent, engine.getPacket()] as const)
+        } catch (e) {
+            console.log(e)
+        }
     })
     await page.goto(url)
 }

@@ -20,14 +20,15 @@ export type DisplayOptions = {
 
 export interface PageApi<Initial, Step> {
     init(): Promise<void>
+    clearPuzzle(opts: DisplayOptions): Promise<void>
     loadPuzzle(packet: Packet<Initial, Step>, opts: DisplayOptions): Promise<void>
     loadPuzzleStep(packet: Packet<Initial, Step>, step: Step, opts: DisplayOptions): Promise<void>
     getImageDataUrl(screenshot: boolean): Promise<string>
 }
 
 export interface WindowApi<Initial, Step> {
-    init(): Promise<void>
-    loadPuzzle(packet: Packet<Initial, Step>): Promise<void>
+    init(html: string): Promise<void>
+    loadPuzzle(packet?: Packet<Initial, Step>): Promise<void>
 }
 
 export interface PRWindow<Initial, Step> {

@@ -136,21 +136,43 @@ class SudokupadApi implements PageApi<string, SudokuPadStep> {
         })
     }
 
-    async getImageDataUrl(screenshot: boolean): Promise<string> {
+    async getImageDataUrl(screenshot: boolean): Promise<string | undefined> {
         try {
             document.body.classList.add("hide-dialogs")
 
-            await Framework.features.screenshot.handleOpenDialog()
+            let tries: number = 0
+            let url: string | undefined = undefined
 
-            Framework.features.screenshot.setOption("blank", !screenshot)
-            await Framework.features.screenshot.updateScreenshot()
+            while (url === undefined && tries < 15) {
 
-            const image = document.querySelector("#screenshot_preview") as HTMLImageElement
-            const downloadString = image.src
+                try {
+                    await Framework.features.screenshot.handleOpenDialog()
 
-            await Framework.features.screenshot.handleCloseDialog()
+                    Framework.features.screenshot.setOption("blank", !screenshot)
+                    await Framework.features.screenshot.updateScreenshot()
 
-            return downloadString
+                    const image = document.querySelector("#screenshot_preview") as HTMLImageElement
+                    if (image?.src !== undefined && image.src.length > 0) {
+                        url = image.src
+                    }
+
+                    await Framework.features.screenshot.handleCloseDialog()
+                } catch (e) { }
+
+                tries++
+                
+                if (url === undefined) {
+                    await new Promise((resolve) => {
+                        window.setTimeout(resolve, 50)
+                    })
+                }
+            }
+
+            try {
+                await Framework.features.screenshot.handleCloseDialog()
+            } catch (e) { }
+
+            return url
         } finally {
             document.body.classList.remove("hide-dialogs")
         }

@@ -23,7 +23,7 @@ export interface PageApi<Initial, Step> {
     clearPuzzle(opts: DisplayOptions): Promise<void>
     loadPuzzle(packet: Packet<Initial, Step>, opts: DisplayOptions): Promise<void>
     loadPuzzleStep(packet: Packet<Initial, Step>, step: Step, opts: DisplayOptions): Promise<void>
-    getImageDataUrl(screenshot: boolean): Promise<string>
+    getImageDataUrl(screenshot: boolean): Promise<string | undefined>
 }
 
 export interface WindowApi<Initial, Step> {

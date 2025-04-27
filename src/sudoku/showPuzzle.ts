@@ -1,5 +1,8 @@
 import { readFileSync } from "fs";
-import { grid, FPuzzlesPuzzle, SudokuPadPuzzle, FPuzzlesStep, SudokuPadStep, Packet } from "./sudoku";
+import { grid, FPuzzlesPuzzle, SudokuPadPuzzle } from "./sudoku";
+import { FPuzzlesStep } from "./api/api";
+import { Packet } from "./api/api";
+import { SudokuPadStep } from "./api/api";
 import { chromium, Page } from "playwright";
 
 const puzzle: FPuzzlesPuzzle = new FPuzzlesPuzzle({

@@ -1,4 +1,5 @@
 import { compress, compressToBase64 } from "lz-string"
+import { FPuzzlesStep, SudokuPadStep } from "./api/api"
 
 const cellColors = [
     "#A8A8A8",
@@ -152,11 +153,6 @@ export interface FPuzzlesData {
     }[]
 }
 
-export type FPuzzlesStep = {
-    puzzle: string
-    red_puzzle: string
-}
-
 export class FPuzzlesPuzzle {
     data: FPuzzlesData
     constructor(data: FPuzzlesData) {
@@ -238,11 +234,6 @@ class ReplayBuilder {
     }
 }
 
-export type SudokuPadStep = {
-    replay: string
-    red_replay: string
-}
-
 export class SudokuPadPuzzle {
     data: FPuzzlesData
     replay: string[]
@@ -322,11 +313,6 @@ export class SudokuPadPuzzle {
             red_replay: red_replay.join("_")
         }
     }
-}
-
-export type Packet<Initial, Step> = {
-    initial: Initial
-    steps: Step[]
 }
 
 export function grid(size: number, cells: { [k: string]: GridCell }): GridCell[][] {

@@ -1,11 +1,31 @@
-import { Packet } from "../sudoku"
+import { Packet, PageApi, PRWindow, WindowApi } from "./api"
 
 type Initial = { __type__: "initial" }
 type Step = { __type__: "step" }
 
-declare function prApiLoadPuzzleStep(packet: Packet<Initial, Step>, step: Step, showRed: boolean): Promise<void>
-declare function prApiLoadPuzzle(packet: Packet<Initial, Step>): Promise<void>
-declare function prApiInit(): void
+class WindowManager {
+    steps: 
+}
+
+class MainWindowApi implements WindowApi<Initial, Step> {
+    pageApi: PageApi<Initial, Step>
+    windowManager: WindowManager
+
+    constructor() {
+        const prWindow = window as PRWindow<Initial, Step>
+        this.pageApi = prWindow.PRPageAPI
+        this.windowManager = new WindowManager()
+    }
+
+    async init(): Promise<void> {
+
+    }
+    async loadPuzzle(packet: Packet<Initial, Step>): Promise<void> {
+
+    }
+}
+
+prWindow.PRWindowApi = new MainWindowApi()
 
 export async function prInit(html: string, packet: Packet<Initial, Step>) {
     document.body.insertAdjacentHTML("beforeend", html)

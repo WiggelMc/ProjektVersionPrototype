@@ -1,4 +1,5 @@
-import { Packet, SudokuPadStep } from "../sudoku"
+import { DisplayOptions, Packet, PageApi } from "./api"
+import { SudokuPadStep } from "./api"
 
 type Puzzle = { __type__: "Puzzle" }
 type Settings = {
@@ -65,104 +66,106 @@ declare const loadFPuzzle: {
     decompressPuzzle: (input: string) => string
 }
 
-async function prApiLoadPuzzle(packet: Packet<string, SudokuPadStep>): Promise<void> {
-    return PuzzleLoader.parsePuzzleData(packet.initial).then(async (puzzle) => {
+class SudokupadApi implements PageApi<string, SudokuPadStep> {
+    async init(): Promise<void> {
+        Framework.setSetting("hidetimer", true)
+        Framework.setSetting("hidesvenpeek", true)
+        Framework.setSetting("hidesventobyemoji", true)
+        Framework.setSetting("nopauseonstart", true)
 
-        Framework.app.restartPuzzle()
-        await Framework.app.loadCompactClassicSudoku()
-        await prLoadSeq("")
+        Framework.setSetting("autocheck", false)
+        Framework.setSetting("checkpencilmarks", false)
+        Framework.setSetting("conflictchecker", "off")
 
-        Framework.app.restartPuzzle()
-        await Framework.app.loadCTCPuzzle(puzzle)
-        await prLoadSeq("")
-    })
-}
-
-function prToCellCode(size: number, row: number, column: number): string {
-    const num = ((row - 1) * size + (column - 1))
-    return `0${num.toString(16)}`.slice(-2)
-}
-
-async function prApiLoadPuzzleStep(packet: Packet<string, SudokuPadStep>, step: SudokuPadStep, showRed: boolean): Promise<void> {
-
-    const size = Framework.app.puzzle.grid.cols
-    const selection = Framework.app.puzzle.selectedCells
-        .map((c) => prToCellCode(size, c.row + 1, c.col + 1))
-
-    const replay: string[] = []
-
-    replay.push(step.replay)
-    if (showRed) {
-        replay.push(step.red_replay)
+        const observer = new MutationObserver((mutations, obs) => {
+            const dialogBox = document.querySelector('.dialog-overlay.centeroverboard')
+            if (dialogBox) {
+                Framework.closeDialog()
+                obs.disconnect()
+            }
+        });
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        })
     }
 
-    if (selection.length > 0) {
-        replay.push(`I${selection.join("")}`)
+    async loadPuzzle(packet: Packet<string, SudokuPadStep>, opts: DisplayOptions): Promise<void> {
+        return PuzzleLoader.parsePuzzleData(packet.initial).then(async (puzzle) => {
+
+            Framework.app.restartPuzzle()
+            await Framework.app.loadCompactClassicSudoku()
+            await this.loadSeq("")
+
+            Framework.app.restartPuzzle()
+            await Framework.app.loadCTCPuzzle(puzzle)
+            await this.loadSeq("")
+        })
     }
 
-    const beforeLoad = Date.now()
-    await prLoadSeq(replay.join("_"))
-    const afterLoad = Date.now()
+    async loadPuzzleStep(packet: Packet<string, SudokuPadStep>, step: SudokuPadStep, opts: DisplayOptions): Promise<void> {
+        const size = Framework.app.puzzle.grid.cols
+        const selection = Framework.app.puzzle.selectedCells
+            .map((c) => SudokupadApi.toCellCode(size, c.row + 1, c.col + 1))
 
-    await new Promise((resolve) => {
-        window.setTimeout(resolve, afterLoad - beforeLoad)
-    })
-}
+        const replay: string[] = []
 
-
-function prApiInit() {
-    Framework.setSetting("hidetimer", true)
-    Framework.setSetting("hidesvenpeek", true)
-    Framework.setSetting("hidesventobyemoji", true)
-    Framework.setSetting("nopauseonstart", true)
-
-    Framework.setSetting("autocheck", false)
-    Framework.setSetting("checkpencilmarks", false)
-    Framework.setSetting("conflictchecker", "off")
-
-    const observer = new MutationObserver((mutations, obs) => {
-        const dialogBox = document.querySelector('.dialog-overlay.centeroverboard')
-        if (dialogBox) {
-            Framework.closeDialog()
-            obs.disconnect()
+        replay.push(step.replay)
+        if (opts.showRed) {
+            replay.push(step.red_replay)
         }
-    });
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    })
-}
 
-async function prGetImageDataUrl(screenshot: boolean): Promise<string> {
-    try {
-        document.body.classList.add("hide-dialogs")
+        if (selection.length > 0) {
+            replay.push(`I${selection.join("")}`)
+        }
 
-        await Framework.features.screenshot.handleOpenDialog()
+        const beforeLoad = Date.now()
+        await this.loadSeq(replay.join("_"))
+        const afterLoad = Date.now()
 
-        Framework.features.screenshot.setOption("blank", !screenshot)
-        await Framework.features.screenshot.updateScreenshot()
+        await new Promise((resolve) => {
+            window.setTimeout(resolve, afterLoad - beforeLoad)
+        })
+    }
 
-        const image = document.querySelector("#screenshot_preview") as HTMLImageElement
-        const downloadString = image.src
+    async getImageDataUrl(screenshot: boolean): Promise<string> {
+        try {
+            document.body.classList.add("hide-dialogs")
 
-        await Framework.features.screenshot.handleCloseDialog()
+            await Framework.features.screenshot.handleOpenDialog()
 
-        return downloadString
-    } finally {
-        document.body.classList.remove("hide-dialogs")
+            Framework.features.screenshot.setOption("blank", !screenshot)
+            await Framework.features.screenshot.updateScreenshot()
+
+            const image = document.querySelector("#screenshot_preview") as HTMLImageElement
+            const downloadString = image.src
+
+            await Framework.features.screenshot.handleCloseDialog()
+
+            return downloadString
+        } finally {
+            document.body.classList.remove("hide-dialogs")
+        }
+    }
+
+    private static toCellCode(size: number, row: number, column: number): string {
+        const num = ((row - 1) * size + (column - 1))
+        return `0${num.toString(16)}`.slice(-2)
+    }
+
+    async loadSeq(sequence: string): Promise<void> {
+        const oldReplay: Replay = JSON.parse(Framework.app.getReplay())
+        const newReplay = {
+            ...oldReplay,
+            data: loadFPuzzle.compressPuzzle(sequence)
+        }
+        await Framework.app.loadReplay(JSON.stringify(newReplay), { speed: -1 })
+    }
+
+    exportSeq(): string {
+        const replay: Replay = JSON.parse(Framework.app.getReplay())
+        return loadFPuzzle.decompressPuzzle(replay.data)
     }
 }
 
-async function prLoadSeq(sequence: string): Promise<void> {
-    const oldReplay: Replay = JSON.parse(Framework.app.getReplay())
-    const newReplay = {
-        ...oldReplay,
-        data: loadFPuzzle.compressPuzzle(sequence)
-    }
-    await Framework.app.loadReplay(JSON.stringify(newReplay), { speed: -1 })
-}
-
-function prExportSeq(): string {
-    const replay: Replay = JSON.parse(Framework.app.getReplay())
-    return loadFPuzzle.decompressPuzzle(replay.data)
-}
+window.PRPageAPI = new SudokupadApi()

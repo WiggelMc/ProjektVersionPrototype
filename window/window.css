@@ -29,6 +29,12 @@
     display: flex;
     align-items: center;
     justify-content: space-evenly;
+
+    transition: background-color 50ms linear;
+}
+
+body.is-refreshing .pr-bar>div {
+    transition: background-color 200ms linear;
 }
 
 #media-control {

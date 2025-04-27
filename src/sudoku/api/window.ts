@@ -88,7 +88,7 @@ class WindowManager {
             this.setShowRed(!this.displayOptions.showRed)
         })
         controls.refreshButton.addEventListener("click", (e) => {
-            this.renderPuzzleStep()
+            this.handleRefresh()
         })
         controls.speedSelect.addEventListener("change", (e) => {
             this.setSpeed(Number.parseFloat(controls.speedSelect.value))
@@ -100,6 +100,13 @@ class WindowManager {
                 e.stopImmediatePropagation()
             })
         }
+    }
+    handleRefresh() {
+        document.body.classList.add("is-refreshing")
+        window.setTimeout(() => {
+            document.body.classList.remove("is-refreshing")
+        }, 200)
+        this.renderAll()
     }
     initKeybinds() {
         window.addEventListener("keydown", (e) => {
@@ -127,7 +134,7 @@ class WindowManager {
                     break
                 case "q":
                     if (!e.repeat) {
-                        this.renderPuzzleStep()
+                        this.handleRefresh()
                     }
                     break
                 case "n":
@@ -228,7 +235,6 @@ class WindowManager {
 
     renderAll() {
         this.renderPuzzle()
-        this.renderPuzzleStep()
 
         this.renderProgress()
         this.renderButtons()
@@ -239,6 +245,7 @@ class WindowManager {
         if (this.packet !== undefined) {
             this.pageApi.loadPuzzle(this.packet, this.displayOptions)
         }
+        this.renderPuzzleStep()
     }
 
     renderPuzzleStep() {

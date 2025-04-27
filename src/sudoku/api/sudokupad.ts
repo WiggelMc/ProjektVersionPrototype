@@ -54,6 +54,7 @@ declare const Framework: {
         restartPuzzle: (keepTime?: boolean) => void
         loadCTCPuzzle: (ctcPuzzle: Puzzle) => Promise<boolean>
         loadCompactClassicSudoku: () => Promise<unknown>
+        showMetaInfoUI(puzzle: {}): void
         loadReplay: (replay: string, opts: ReplayOpts) => Promise<void>
         getReplay: () => string
     }
@@ -93,13 +94,16 @@ class SudokupadApi implements PageApi<string, SudokuPadStep> {
     async clearPuzzle(opts: DisplayOptions): Promise<void> {
         Framework.app.restartPuzzle()
         await Framework.app.loadCompactClassicSudoku()
+        Framework.app.showMetaInfoUI({})
         await this.loadSeq("")
     }
 
     async loadPuzzle(packet: Packet<string, SudokuPadStep>, opts: DisplayOptions): Promise<void> {
         return PuzzleLoader.parsePuzzleData(packet.initial).then(async (puzzle) => {
 
-            await this.clearPuzzle(opts)
+            Framework.app.restartPuzzle()
+            await Framework.app.loadCompactClassicSudoku()
+            await this.loadSeq("")
 
             Framework.app.restartPuzzle()
             await Framework.app.loadCTCPuzzle(puzzle)

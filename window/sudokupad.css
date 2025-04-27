@@ -21,6 +21,10 @@ body.hide-dialogs .dialog-overlay {
     border-radius: 1.2vw;
 }
 
+body.is-refreshing .pr-bar>div {
+    background-color: rgb(241, 241, 241)
+}
+
 #pr-side-bar {
     margin-top: 65px;
     height: calc(80vh - 65px) !important;

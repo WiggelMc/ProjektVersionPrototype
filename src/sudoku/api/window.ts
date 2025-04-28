@@ -29,6 +29,8 @@ class WindowManager {
     controls?: ControlElements
 
     playingIntervalID: number | null = null
+    renderWorking: boolean = false
+    renderAgain: boolean = false
 
     constructor(pageApi: PageApi<Initial, Step>) {
         this.pageApi = pageApi
@@ -249,16 +251,29 @@ class WindowManager {
     }
 
     async renderPuzzleStep() {
-        if (this.packet === undefined) {
-            await this.pageApi.clearPuzzle(this.displayOptions)
-        } else if (this.packet.steps.length == 0) {
-            await this.pageApi.loadPuzzle(this.packet, this.displayOptions)
-        } else {
-            const step = this.packet.steps[this.progress]
-            if (step !== undefined) {
-                await this.pageApi.loadPuzzleStep(this.packet, step, this.displayOptions)
-            }
+        if (this.renderWorking) {
+            this.renderAgain = true
+            return
         }
+
+        this.renderWorking = true
+
+        do {
+            this.renderAgain = false
+
+            if (this.packet === undefined) {
+                await this.pageApi.clearPuzzle(this.displayOptions)
+            } else if (this.packet.steps.length == 0) {
+                await this.pageApi.loadPuzzle(this.packet, this.displayOptions)
+            } else {
+                const step = this.packet.steps[this.progress]
+                if (step !== undefined) {
+                    await this.pageApi.loadPuzzleStep(this.packet, step, this.displayOptions)
+                }
+            }
+        } while (this.renderAgain)
+
+        this.renderWorking = false
     }
 
     renderProgress() {

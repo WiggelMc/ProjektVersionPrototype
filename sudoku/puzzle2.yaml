@@ -1,0 +1,33 @@
+# yaml-language-server: $schema=./puzzle2.schema.json
+
+constaints1:
+  # Bad IDE Support (Autocomplete to broad)
+  - type: X
+    paramX1: "Max"
+    paramX2: "Kim"
+  - type: Y
+    paramY1: A
+    paramY2: B
+constaints1a:
+  - type: X
+    paramX1: "Max"
+    paramX2: "Kim"
+  - type: Y
+    paramY1: A
+    paramY2: A
+constaints2:
+  # No Ordering support, because properties are grouped
+  X:
+    - paramX1: "Max"
+      paramX2: "Kim"
+  Y:
+    - paramY1: A
+      paramY2: A
+constaints3:
+  # A bit verbose, autocomplete needs more steps, but very versatile
+  - X:
+      paramX1: "Max"
+      paramX2: "Kim"
+  - Y:
+      paramY1: A
+      paramY2: A

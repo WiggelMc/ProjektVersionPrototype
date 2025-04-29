@@ -1,0 +1,247 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "variant-sudoku-generator/puzzle-config/1.0.0",
+  "title": "Puzzle",
+  "description": "Fpuzzles Format",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "constaints1": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "X",
+              "Y"
+            ]
+          },
+          "paramX1": {
+            "type": "string"
+          },
+          "paramX2": {
+            "type": "string"
+          },
+          "paramY1": {
+            "type": "string"
+          },
+          "paramY2": {
+            "type": "string"
+          }
+        },
+        "oneOf": [
+          {
+            "properties": {
+              "type": {
+                "const": "X"
+              },
+              "paramX1": {
+                "type": "string"
+              },
+              "paramX2": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "paramX1",
+              "paramX2"
+            ],
+            "additionalProperties": false
+          },
+          {
+            "properties": {
+              "type": {
+                "const": "Y"
+              },
+              "paramY1": {
+                "type": "string"
+              },
+              "paramY2": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "type",
+              "paramY1",
+              "paramY2"
+            ],
+            "additionalProperties": false
+          }
+        ],
+        "additionalProperties": false
+      }
+    },
+    "constaints1a": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "X",
+              "Y"
+            ]
+          },
+          "paramX1": {
+            "type": "string"
+          },
+          "paramX2": {
+            "type": "string"
+          },
+          "paramY1": {
+            "type": "string"
+          },
+          "paramY2": {
+            "type": "string"
+          }
+        },
+        "oneOf": [
+          {
+            "$ref": "#/definitions/ConstraintX"
+          },
+          {
+            "$ref": "#/definitions/ConstraintY"
+          }
+        ],
+        "additionalProperties": false
+      }
+    },
+    "constaints2": {
+      "type": "object",
+      "properties": {
+        "X": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "paramX1": {
+                "type": "string"
+              },
+              "paramX2": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "paramX1",
+              "paramX2"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "Y": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "paramY1": {
+                "type": "string"
+              },
+              "paramY2": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "paramY1",
+              "paramY2"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "constaints3": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "minProperties": 1,
+        "maxProperties": 1,
+        "properties": {
+          "X": {
+            "type": "object",
+            "properties": {
+              "paramX1": {
+                "type": "string"
+              },
+              "paramX2": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "paramX1",
+              "paramX2"
+            ],
+            "additionalProperties": false
+          },
+          "Y": {
+            "type": "object",
+            "properties": {
+              "paramY1": {
+                "type": "string"
+              },
+              "paramY2": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "paramY1",
+              "paramY2"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "definitions": {
+    "ConstraintX": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "X"
+        },
+        "paramX1": {
+          "type": "string"
+        },
+        "paramX2": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "paramX1",
+        "paramX2"
+      ],
+      "additionalProperties": false
+    },
+    "ConstraintY": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "const": "Y"
+        },
+        "paramY1": {
+          "type": "string"
+        },
+        "paramY2": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "paramY1",
+        "paramY2"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false,
+  "required": []
+}

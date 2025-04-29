@@ -198,6 +198,57 @@
         },
         "additionalProperties": false
       }
+    },
+    "constaints3a": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "minProperties": 1,
+        "maxProperties": 1,
+        "properties": {
+          "X": {
+            "type": "object",
+            "properties": {
+              "paramBase1": {
+                "$ref": "#/definitions/SubObj"
+              },
+              "paramX1": {
+                "type": "string"
+              },
+              "paramX2": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "paramBase1",
+              "paramX1",
+              "paramX2"
+            ],
+            "unevaluatedProperties": false
+          },
+          "Y": {
+            "type": "object",
+            "properties": {
+              "paramBase1": {
+                "$ref": "#/definitions/SubObj"
+              },
+              "paramY1": {
+                "type": "string"
+              },
+              "paramY2": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "paramBase1",
+              "paramY1",
+              "paramY2"
+            ],
+            "unevaluatedProperties": false
+          }
+        },
+        "additionalProperties": false
+      }
     }
   },
   "definitions": {
@@ -238,6 +289,22 @@
         "type",
         "paramY1",
         "paramY2"
+      ],
+      "additionalProperties": false
+    },
+    "SubObj": {
+      "type": "object",
+      "properties": {
+        "a": {
+          "type": "string"
+        },
+        "b": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "a",
+        "b"
       ],
       "additionalProperties": false
     }

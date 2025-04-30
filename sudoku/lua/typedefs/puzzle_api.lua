@@ -27,13 +27,16 @@ local version_lock = {}
 ---@param key string
 function version_lock:lock(key) end
 
+---@param hash string
+function version_lock:lock_with_hash(hash) end
+
 function version_lock:unlock() end
 
 
 ---@class Puzzle
 local puzzle = {}
 
-function puzzle.build() end
+function puzzle:build() end
 
 
 

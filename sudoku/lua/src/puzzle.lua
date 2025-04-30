@@ -5,8 +5,39 @@ local version_lock = logicpt.puzzle.v1.create_version_lock {
     useGlobalKey = true
 }
 
+-- Maybe split into different classes,
+-- TempLock .lock()
+-- GlobalTempLock .lock(tag)
+-- PuzzleLock .lock(hash?)
+-- GlobalPuzzleLock .lock(tag)
+
 version_lock:lock("v1")
 
-puzzle.build()
+puzzle:build()
 
 version_lock:unlock()
+
+--[[
+
+Folder Structure:
+
+.luarc.json
+.logicpt.json (config file, good for global folder and compile settings) (not required, but maybe a good idea)
+    // logicpt project build puzzle (uses project structure)
+    // logicpt build puzzle (uses file only)
+.editorconfig
+temp/
+    locks/
+        puzzle/
+            puzzle.lock.json
+        global/
+            v1.lock.json
+locks/
+    puzzle/
+        puzzle.lock.json (maybe next to puzzle file)
+    global/
+        v1.lock.json
+puzzles/
+    puzzle.lua
+
+]] --

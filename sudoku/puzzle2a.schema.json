@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "variant-sudoku-generator/puzzle-config/a/1.0.1",
+  "title": "Puzzle",
+  "description": "Fpuzzles Format",
+  "type": "string",
+  "enum": [
+    "german_whispers:check",
+    "renban:check"
+  ]
+}

@@ -36,13 +36,13 @@ constaints3a:
   # Same, but with shared properties
   - X:
       paramBase1:
-        a: "Max"
+        a: german_whispers:check
         b: "Kim"
       paramX1: "Max"
       paramX2: "Kim"
   - Y:
       paramBase1:
-        a: A
+        a: renban:check
         b: A
       paramY1: A
       paramY2: A

@@ -296,7 +296,7 @@
       "type": "object",
       "properties": {
         "a": {
-          "type": "string"
+          "$ref": "./puzzle2a.schema.json"
         },
         "b": {
           "type": "string"

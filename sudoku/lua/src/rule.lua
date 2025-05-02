@@ -1,4 +1,4 @@
-logicpt.logic.v1.register()
+puzzpt.logic.v1.register()
 
 ---@alias Rule<T> { data: T }
 

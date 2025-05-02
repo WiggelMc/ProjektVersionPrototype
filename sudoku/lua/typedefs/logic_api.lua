@@ -2,7 +2,7 @@
 
 ---@class LogicCpt
 ---@field logic LogicApi
-logicpt = logicpt or {}
+puzzpt = puzzpt or {}
 
 ---@class LogicApi
 ---@field v1 LogicApiV1

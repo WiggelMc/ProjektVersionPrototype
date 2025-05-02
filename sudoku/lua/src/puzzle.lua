@@ -1,6 +1,6 @@
-local puzzle = logicpt.puzzle.v1.create_puzzle("puzzle 1")
+local puzzle = puzzpt.puzzle.v1.create_puzzle("puzzle 1")
 
-local version_lock = logicpt.puzzle.v1.create_version_lock {
+local version_lock = puzzpt.puzzle.v1.create_version_lock {
     isTemporary = true,
     useGlobalKey = true
 }
@@ -22,9 +22,9 @@ version_lock:unlock()
 Folder Structure:
 
 .luarc.json
-.logicpt.json (config file, good for global folder and compile settings) (not required, but maybe a good idea)
-    // logicpt project build puzzle (uses project structure)
-    // logicpt build puzzle (uses file only)
+.puzzpt.json (config file, good for global folder and compile settings) (not required, but maybe a good idea)
+    // puzzpt project build puzzle (uses project structure)
+    // puzzpt build puzzle (uses file only)
 .editorconfig
 temp/
     locks/

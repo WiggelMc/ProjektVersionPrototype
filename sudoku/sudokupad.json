@@ -1,0 +1,471 @@
+{
+  "id": "sxsm_MichaelLefkowitz_074095189092160e8e41647fa4abf91e",
+  "metadata": {
+    "source": "Sudoku Maker v2024.03.28-834a788",
+    "title": "...What?",
+    "author": "Michael Lefkowitz",
+    "msgcorrect": "You solved the puzzle! I'm so sorry!",
+    "rules": "- Normal 6x6 sudoku rules apply.\n- Each digit in a circle indicates how many times that digit appears in a circle in the puzzle.\n- Digits strictly never appear more than once in a cage. \n- Cells separated by an X sum to 10. Not all possible Xs are given!\n- Grey lines are palindromes, i.e. digits equidistant from a grey line's center are always the same.\n- Those are all the rules. Do not forget any of them.",
+    "solution": "426153315264163542254631542316631425"
+  },
+  "cages": [
+    {
+      "cells": [
+        [
+          4,
+          0
+        ],
+        [
+          4,
+          1
+        ],
+        [
+          4,
+          2
+        ],
+        [
+          4,
+          3
+        ]
+      ]
+    }
+  ],
+  "cellSize": 50,
+  "cells": [
+    [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ],
+    [
+      {},
+      {},
+      {},
+      {},
+      {},
+      {}
+    ]
+  ],
+  "regions": [
+    [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        2
+      ]
+    ],
+    [
+      [
+        0,
+        3
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        0,
+        5
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        1,
+        5
+      ]
+    ],
+    [
+      [
+        2,
+        0
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        3,
+        1
+      ],
+      [
+        3,
+        2
+      ]
+    ],
+    [
+      [
+        2,
+        3
+      ],
+      [
+        2,
+        4
+      ],
+      [
+        2,
+        5
+      ],
+      [
+        3,
+        3
+      ],
+      [
+        3,
+        4
+      ],
+      [
+        3,
+        5
+      ]
+    ],
+    [
+      [
+        4,
+        0
+      ],
+      [
+        4,
+        1
+      ],
+      [
+        4,
+        2
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        5,
+        1
+      ],
+      [
+        5,
+        2
+      ]
+    ],
+    [
+      [
+        4,
+        3
+      ],
+      [
+        4,
+        4
+      ],
+      [
+        4,
+        5
+      ],
+      [
+        5,
+        3
+      ],
+      [
+        5,
+        4
+      ],
+      [
+        5,
+        5
+      ]
+    ]
+  ],
+  "lines": [
+    {
+      "wayPoints": [
+        [
+          5.5,
+          4.5
+        ],
+        [
+          4.5,
+          4.5
+        ],
+        [
+          3.5,
+          3.5
+        ],
+        [
+          3.5,
+          2.5
+        ],
+        [
+          2.5,
+          1.5
+        ],
+        [
+          0.5,
+          1.5
+        ]
+      ],
+      "color": "#aaaf",
+      "thickness": 3
+    },
+    {
+      "wayPoints": [
+        [
+          3.5,
+          4.5
+        ],
+        [
+          2.5,
+          4.5
+        ],
+        [
+          1.5,
+          5.5
+        ],
+        [
+          0.5,
+          5.5
+        ]
+      ],
+      "color": "#cacacaff",
+      "thickness": 19
+    }
+  ],
+  "overlays": [
+    {
+      "center": [
+        5.5,
+        4.5
+      ],
+      "width": 0.82,
+      "height": 0.82,
+      "stroke": "none",
+      "thickness": 1,
+      "angle": 0,
+      "rounded": true,
+      "backgroundColor": "#FFFFFF",
+      "borderColor": "#aaaf"
+    },
+    {
+      "center": [
+        0.5,
+        1.5
+      ],
+      "width": 0.82,
+      "height": 0.82,
+      "stroke": "none",
+      "thickness": 1,
+      "angle": 0,
+      "rounded": true,
+      "backgroundColor": "#FFFFFF",
+      "borderColor": "#aaaf"
+    },
+    {
+      "center": [
+        2.5,
+        0.5
+      ],
+      "width": 0.82,
+      "height": 0.82,
+      "stroke": "none",
+      "thickness": 1,
+      "angle": 0,
+      "rounded": true,
+      "backgroundColor": "#FFFFFF",
+      "borderColor": "#000000"
+    },
+    {
+      "center": [
+        5.5,
+        3.5
+      ],
+      "width": 0.82,
+      "height": 0.82,
+      "stroke": "none",
+      "thickness": 1,
+      "angle": 0,
+      "rounded": true,
+      "backgroundColor": "#FFFFFF",
+      "borderColor": "#000000"
+    },
+    {
+      "center": [
+        5,
+        5.5
+      ],
+      "width": 0.34,
+      "height": 0.34,
+      "stroke": "none",
+      "text": 4,
+      "color": "#FFFFFF",
+      "rounded": true,
+      "backgroundColor": "#000000"
+    },
+    {
+      "center": [
+        2,
+        3
+      ],
+      "width": 0.62,
+      "height": 0.62,
+      "stroke": "none",
+      "thickness": 1,
+      "text": "",
+      "rounded": true,
+      "backgroundColor": "#FFFFFF",
+      "borderColor": "#000000"
+    },
+    {
+      "center": [
+        1.88,
+        2.915
+      ],
+      "width": 0.1,
+      "height": 0.1,
+      "stroke": "none",
+      "text": 3
+    },
+    {
+      "center": [
+        1.88,
+        3.085
+      ],
+      "width": 0.1,
+      "height": 0.1,
+      "stroke": "none",
+      "text": 4
+    },
+    {
+      "center": [
+        2.12,
+        2.915
+      ],
+      "width": 0.1,
+      "height": 0.1,
+      "stroke": "none",
+      "text": 4
+    },
+    {
+      "center": [
+        2.12,
+        3.085
+      ],
+      "width": 0.1,
+      "height": 0.1,
+      "stroke": "none",
+      "text": 3
+    }
+  ],
+  "underlays": [
+    {
+      "center": [
+        3.5,
+        3
+      ],
+      "width": 0.8,
+      "height": 0.05,
+      "stroke": "none",
+      "angle": 45,
+      "backgroundColor": "#aaaf"
+    },
+    {
+      "center": [
+        3.5,
+        3
+      ],
+      "width": 0.8,
+      "height": 0.05,
+      "stroke": "none",
+      "angle": 315,
+      "backgroundColor": "#aaaf"
+    },
+    {
+      "center": [
+        4.25,
+        0.25
+      ],
+      "width": 0,
+      "height": 0.504,
+      "stroke": "none",
+      "text": "16",
+      "fontSize": 15,
+      "color": "#000000",
+      "angle": 0,
+      "rounded": true
+    },
+    {
+      "center": [
+        3.5,
+        4.5
+      ],
+      "width": 0.8,
+      "height": 0.8,
+      "stroke": "none",
+      "angle": 0,
+      "rounded": true,
+      "backgroundColor": "#cccf"
+    }
+  ]
+}
